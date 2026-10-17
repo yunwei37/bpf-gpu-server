@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// BPFusion ingress-wake probe.
+// bpf-gpu-server ingress-wake probe.
 //
 // Measures, on this host, the latency chain
 //   sender sendto()  ->  eBPF socket filter  ->  userspace runnable

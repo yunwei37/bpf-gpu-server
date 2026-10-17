@@ -19,9 +19,9 @@ Use the Linux/GPU/CUDA/libbpf/Python prerequisites in
 [getting started](getting-started.md). Activate that environment, then:
 
 ~~~sh
-make build/fusion.bpf.o build/bpfusion_load \
+make build/server.bpf.o build/bpf_gpu_server_load \
   graph-server-kernel-network graph-server-user-network-wait
-./build/bpfusion_load stream-uring-attach
+./build/bpf_gpu_server_load stream-uring-attach
 python3 examples/torch_graph_server.py build/graph_server_kernel_network.so matmul --seconds 120
 ~~~
 
@@ -30,9 +30,9 @@ For FFT, substitute fft for matmul. Stop one server and clean its pins before
 starting another. After it exits:
 
 ~~~sh
-./build/bpfusion_load stats
-./build/bpfusion_load stream-detach
-rm -f /sys/fs/bpf/bpfusion_ctl /sys/fs/bpf/bpfusion_stats /sys/fs/bpf/bpfusion_db
+./build/bpf_gpu_server_load stats
+./build/bpf_gpu_server_load stream-detach
+rm -f /sys/fs/bpf/bgs_ctl /sys/fs/bpf/bgs_stats /sys/fs/bpf/bgs_db
 ~~~
 
 The matched native path needs no BPF attach:

@@ -1,6 +1,6 @@
 #!/bin/bash
 # SPDX-License-Identifier: Apache-2.0
-# BPFusion: end-to-end benchmark.
+# bpf-gpu-server: end-to-end benchmark.
 #   bench/run_e2e.sh <seconds> <work> <batch> <cpu_gpu> <cpu_resp> <idle>
 #
 # Runs, against one daemon lifetime:
@@ -31,11 +31,11 @@ BURST_DEPTH=8
 pkill -f 'build/executor' 2>/dev/null
 pkill -f 'build/echo_udp' 2>/dev/null
 sleep 0.3
-./build/bpfusion_load detach lo >/dev/null 2>&1
-./build/bpfusion_load attach lo >/dev/null 2>&1 || { echo "attach failed"; exit 1; }
+./build/bpf_gpu_server_load detach lo >/dev/null 2>&1
+./build/bpf_gpu_server_load attach lo >/dev/null 2>&1 || { echo "attach failed"; exit 1; }
 
 {
-	echo "== BPFusion end-to-end run $STAMP =="
+	echo "== bpf-gpu-server end-to-end run $STAMP =="
 	echo "host: $(uname -sr)  $(nproc) cpus"
 	echo "cmdline: $(cat /proc/cmdline)"
 	echo "gpu: $(nvidia-smi --query-gpu=name,driver_version --format=csv,noheader 2>/dev/null | head -1)"
@@ -70,8 +70,8 @@ wait "$DPID" 2>/dev/null
 {
 	echo
 	echo "--- page/BPF counters ---"
-	./build/bpfusion_load stats 2>&1
-	./build/bpfusion_load detach lo 2>&1
+	./build/bpf_gpu_server_load stats 2>&1
+	./build/bpf_gpu_server_load detach lo 2>&1
 } >> "$LOG" 2>&1
 
 # --- baseline: userspace echo, no GPU, no control page ------------------

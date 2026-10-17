@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-# BPFusion: external HTTP baseline client (vLLM OpenAI-compatible server).
+# bpf-gpu-server: external HTTP baseline client (vLLM OpenAI-compatible server).
 #
 # The fair "what a normal serving stack does" path: a streamed chat completion
 # over TCP/HTTP. TTFT = request write -> first content token; TPOT = mean

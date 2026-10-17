@@ -18,11 +18,11 @@
 #include <cstdlib>
 #include <vector>
 #include <csignal>
-#include "bpfusion_queue.h"
+#include "bpf_gpu_server_queue.h"
 
 #define CUDA(call) do { cudaError_t e = (call); if (e != cudaSuccess) { \
     fprintf(stderr, "%s: %s\n", #call, cudaGetErrorString(e)); exit(1); } } while (0)
-constexpr int CTX = 2 * BF_LLM_MAX_TOK;
+constexpr int CTX = 2 * BGS_LLM_MAX_TOK;
 struct Config { unsigned h, inter, layers, heads, kvheads, vocab; float eps, theta; };
 struct Layer { half *norm, *q, *qb, *k, *kb, *v, *vb, *o, *post, *gate, *up, *down; };
 struct Model { Config c; half *embed, *norm; Layer *layer; float *inverse; };
@@ -194,30 +194,30 @@ __device__ unsigned sample(Model m, Scratch s, unsigned count) {
     sync_grid();
     return s.control[4];
 }
-__global__ void resident(bf_page *p, Model m, Scratch s, unsigned seen, bool once) {
+__global__ void resident(bgs_page *p, Model m, Scratch s, unsigned seen, bool once) {
     unsigned head, state, prompt, gen, token;
     for(;;) {
         sync_grid();
         if(!rank()) {
             s.control[0]=__ldcg(&p->llm_head);
-            s.control[1]=__ldcg(&p->llm[seen%BF_LLM_SLOTS].state);
+            s.control[1]=__ldcg(&p->llm[seen%BGS_LLM_SLOTS].state);
             if(__ldcg((unsigned long long *)&p->stop_ns)) s.control[0]=0xffffffff;
         }
         sync_grid();
         head=s.control[0]; state=s.control[1];
         if(head==0xffffffff) return;
-        if(head==seen || state!=BF_PENDING) continue;
-        bf_llm_slot *slot=&p->llm[seen%BF_LLM_SLOTS];
+        if(head==seen || state!=BGS_PENDING) continue;
+        bgs_llm_slot *slot=&p->llm[seen%BGS_LLM_SLOTS];
         if(!rank()) {
             unsigned np=__ldcg(&slot->n_prompt), ng=__ldcg(&slot->n_gen);
-            bool bad=!np || np>BF_LLM_MAX_TOK || !ng || ng>BF_LLM_MAX_TOK;
-            for(unsigned i=0;i<np && i<BF_LLM_MAX_TOK;i++)
+            bool bad=!np || np>BGS_LLM_MAX_TOK || !ng || ng>BGS_LLM_MAX_TOK;
+            for(unsigned i=0;i<np && i<BGS_LLM_MAX_TOK;i++)
                 if(__ldcg(&slot->tok_in[i])>=m.c.vocab) bad=true;
             s.control[2]=bad ? 0 : np; s.control[3]=ng;
             unsigned short flags=__ldcg(&slot->pad);
             __threadfence_system();
-            __stcg(&slot->pad,(unsigned short)((flags & ~BF_LLM_VALIDATING) |
-                                             (bad ? BF_LLM_REJECTED : 0)));
+            __stcg(&slot->pad,(unsigned short)((flags & ~BGS_LLM_VALIDATING) |
+                                             (bad ? BGS_LLM_REJECTED : 0)));
         }
         sync_grid();
         prompt=s.control[2]; gen=s.control[3];
@@ -225,7 +225,7 @@ __global__ void resident(bf_page *p, Model m, Scratch s, unsigned seen, bool onc
             if(!rank()) {
                 __stcg(&slot->produced,0u);
                 __threadfence_system();
-                __stcg(&slot->state,(unsigned)BF_DONE);
+                __stcg(&slot->state,(unsigned)BGS_DONE);
             }
             sync_grid();
             seen++;
@@ -252,7 +252,7 @@ __global__ void resident(bf_page *p, Model m, Scratch s, unsigned seen, bool onc
         }
         if(!rank()) {
             __threadfence_system();
-            __stcg(&slot->state,(unsigned)BF_DONE);
+            __stcg(&slot->state,(unsigned)BGS_DONE);
         }
         sync_grid();
         seen++;
@@ -300,12 +300,12 @@ int main(int argc,char **argv) {
     CUDA(cudaMemcpy(m.inverse,inverse.data(),inverse.size()*sizeof(float),cudaMemcpyHostToDevice));
     Scratch s={};
     auto alloc=[&](float **p,size_t n) { CUDA(cudaMalloc(p,n*sizeof(float))); };
-    alloc(&s.x,c.h*BF_LLM_MAX_TOK); alloc(&s.norm,c.h*BF_LLM_MAX_TOK); alloc(&s.q,c.h*BF_LLM_MAX_TOK);
-    alloc(&s.k,kv*BF_LLM_MAX_TOK); alloc(&s.v,kv*BF_LLM_MAX_TOK);
-    alloc(&s.att,c.h*BF_LLM_MAX_TOK); alloc(&s.out,c.h*BF_LLM_MAX_TOK);
-    alloc(&s.gate,c.inter*BF_LLM_MAX_TOK); alloc(&s.up,c.inter*BF_LLM_MAX_TOK);
-    alloc(&s.prob,c.heads*CTX*BF_LLM_MAX_TOK); alloc(&s.logits,c.vocab);
-    CUDA(cudaMalloc(&s.input,BF_LLM_MAX_TOK*sizeof(unsigned)));
+    alloc(&s.x,c.h*BGS_LLM_MAX_TOK); alloc(&s.norm,c.h*BGS_LLM_MAX_TOK); alloc(&s.q,c.h*BGS_LLM_MAX_TOK);
+    alloc(&s.k,kv*BGS_LLM_MAX_TOK); alloc(&s.v,kv*BGS_LLM_MAX_TOK);
+    alloc(&s.att,c.h*BGS_LLM_MAX_TOK); alloc(&s.out,c.h*BGS_LLM_MAX_TOK);
+    alloc(&s.gate,c.inter*BGS_LLM_MAX_TOK); alloc(&s.up,c.inter*BGS_LLM_MAX_TOK);
+    alloc(&s.prob,c.heads*CTX*BGS_LLM_MAX_TOK); alloc(&s.logits,c.vocab);
+    CUDA(cudaMalloc(&s.input,BGS_LLM_MAX_TOK*sizeof(unsigned)));
     alloc(&s.keys,(size_t)c.layers*CTX*kv); alloc(&s.values,(size_t)c.layers*CTX*kv);
     CUDA(cudaMalloc(&s.control,5*sizeof(unsigned)));
     cudaDeviceProp prop; CUDA(cudaGetDeviceProperties(&prop,0));
@@ -313,20 +313,20 @@ int main(int argc,char **argv) {
     int blocks_per_sm; CUDA(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blocks_per_sm,resident,256,0));
     if (!blocks_per_sm) return 1;
     unsigned blocks=prop.multiProcessorCount;
-    int fd=bpf_obj_get("/sys/fs/bpf/bpfusion_ctl"); if(fd<0) { perror("bpf_obj_get"); return 1; }
-    auto *page=(bf_page *)mmap(nullptr,BF_PAGE_MMAP_BYTES,PROT_READ|PROT_WRITE,MAP_SHARED,fd,0);
+    int fd=bpf_obj_get("/sys/fs/bpf/bgs_ctl"); if(fd<0) { perror("bpf_obj_get"); return 1; }
+    auto *page=(bgs_page *)mmap(nullptr,BGS_PAGE_MMAP_BYTES,PROT_READ|PROT_WRITE,MAP_SHARED,fd,0);
     if(page==MAP_FAILED) { perror("mmap"); return 1; }
-    CUDA(cudaHostRegister(page,BF_PAGE_MMAP_BYTES,cudaHostRegisterMapped));
-    bf_page *device; CUDA(cudaHostGetDevicePointer((void **)&device,page,0));
+    CUDA(cudaHostRegister(page,BGS_PAGE_MMAP_BYTES,cudaHostRegisterMapped));
+    bgs_page *device; CUDA(cudaHostGetDevicePointer((void **)&device,page,0));
     int listener=socket(AF_INET,SOCK_STREAM,0), yes=1;
     setsockopt(listener,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof(yes));
-    sockaddr_in addr={}; addr.sin_family=AF_INET; addr.sin_port=htons(BF_LLM_TCP_PORT);
+    sockaddr_in addr={}; addr.sin_family=AF_INET; addr.sin_port=htons(BGS_LLM_TCP_PORT);
     addr.sin_addr.s_addr=htonl(INADDR_LOOPBACK);
     if(bind(listener,(sockaddr *)&addr,sizeof(addr)) || listen(listener,SOMAXCONN)) { perror("listen"); return 1; }
     // Listener creation is bootstrap only. The module owns accept and RX drain.
     __atomic_store_n(&page->stop_ns,0,__ATOMIC_RELEASE);
     unsigned seen=0, launches=0;
-#ifdef BF_HOST_LAUNCH
+#ifdef BGS_HOST_LAUNCH
     bool once=true;
     const char *dispatch="host-launch";
 #else
@@ -339,7 +339,7 @@ int main(int argc,char **argv) {
         CUDA(cudaLaunchCooperativeKernel((void *)resident,blocks,256,args));
         launches++;
     }
-    int module=open("module/bfusion_tx.ko",O_RDONLY|O_CLOEXEC);
+    int module=open("module/bpf_gpu_server_tx.ko",O_RDONLY|O_CLOEXEC);
     if(module<0) { perror("module open"); return 1; }
     char params[80]; snprintf(params,sizeof(params),"map_fd=%d listen_fd=%d",fd,listener);
     if(syscall(SYS_finit_module,module,params,0)) { perror("finit_module"); return 1; }
@@ -353,7 +353,7 @@ int main(int argc,char **argv) {
         // is no added sleep, copy, network worker or per-token host launch.
         while (!stopped) {
             if (__atomic_load_n(&page->llm_head,__ATOMIC_ACQUIRE)==seen ||
-                __atomic_load_n(&page->llm[seen%BF_LLM_SLOTS].state,__ATOMIC_ACQUIRE)!=BF_PENDING)
+                __atomic_load_n(&page->llm[seen%BGS_LLM_SLOTS].state,__ATOMIC_ACQUIRE)!=BGS_PENDING)
                 continue;
             CUDA(cudaLaunchCooperativeKernel((void *)resident,blocks,256,args));
             launches++;
@@ -366,10 +366,10 @@ int main(int argc,char **argv) {
     }
     __atomic_store_n(&page->stop_ns,1,__ATOMIC_RELEASE);
     cudaError_t finished=cudaDeviceSynchronize();
-    if(syscall(SYS_delete_module,"bfusion_tx",0)) { perror("delete_module"); return 1; }
+    if(syscall(SYS_delete_module,"bpf_gpu_server_tx",0)) { perror("delete_module"); return 1; }
     close(listener);
     CUDA(finished);
-    CUDA(cudaHostUnregister(page)); munmap(page,BF_PAGE_MMAP_BYTES);
+    CUDA(cudaHostUnregister(page)); munmap(page,BGS_PAGE_MMAP_BYTES);
     printf("resident Qwen stopped: dispatch=%s launches=%u\n",dispatch,launches);
     return 0;
 }

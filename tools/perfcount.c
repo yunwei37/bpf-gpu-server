@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
-// BPFusion: count retired instructions / cycles of a running PID via
+// bpf-gpu-server: count retired instructions / cycles of a running PID via
 // perf_event_open (the system `perf` wrapper is broken on this kernel).
 //
 //   ./build/perfcount <pid> <ms>
 //   -> "instructions=<n> cycles=<n> ms=<n>"
 //
-// Used to price the BPFusion path in CPU instructions per generated token:
+// Used to price the bpf-gpu-server path in CPU instructions per generated token:
 // count the executor's instructions over a window while it serves N tokens,
 // subtract the idle-poll rate measured over an empty window of the same
 // length, and divide by the tokens served.

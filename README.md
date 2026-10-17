@@ -2,6 +2,26 @@
 
 原名 BPFusion。
 
+The project now uses the following source and command names. Archived raw data
+and historical findings keep their original commands so their records remain
+replayable; they describe the same project under its former name.
+
+| Historical name | Current name |
+|---|---|
+| bpfusion_load | bpf_gpu_server_load |
+| fusion.bpf.c / fusion.bpf.o | server.bpf.c / server.bpf.o |
+| bpfusion_queue.h / bpfusion_admission.h | bpf_gpu_server_queue.h / bpf_gpu_server_admission.h |
+| bfusion_tx.ko | bpf_gpu_server_tx.ko (legacy transport) |
+| BF_* macros and environment variables; bf_* symbols | BGS_*; bgs_* |
+| /sys/fs/bpf/bpfusion_* pins | /sys/fs/bpf/bgs_* pins |
+
+Rebuild the loader, BPF objects, executor and any caller of the graph C API
+together. Stop and detach an old instance with its own loader before switching;
+old/new pin names and graph exports are not aliases. Wire framing and shared
+page layout are unchanged. Existing Workspace and automation identities are
+operational records and are not renamed by this source change.
+
+
 Experimental serving transport over ordinary Linux TCP, with eBPF admission
 and caller-supplied GPU execution. Userspace initializes the service; the
 kernel-owned path manages request/reply lifetimes around reused CUDA graphs.
@@ -44,9 +64,9 @@ It includes prerequisites, normal builds, cuBLAS/cuFFT examples, a binary client
 the same-executor native comparator and cleanup. With those dependencies active:
 
 ~~~sh
-make build/fusion.bpf.o build/bpfusion_load \
+make build/server.bpf.o build/bpf_gpu_server_load \
   graph-server-kernel-network graph-server-user-network-wait
-./build/bpfusion_load stream-uring-attach
+./build/bpf_gpu_server_load stream-uring-attach
 python3 examples/torch_graph_server.py build/graph_server_kernel_network.so fft --seconds 120
 ~~~
 
@@ -73,9 +93,9 @@ See the [host record](bench/results/HOST.md).
 With the documented dependencies and environment active:
 
 ~~~sh
-make build/fusion.bpf.o build/bpfusion_load \
+make build/server.bpf.o build/bpf_gpu_server_load \
   vllm-mixed-uring-loop vllm-mixed-user-network-wait
-./build/bpfusion_load stream-uring-attach
+./build/bpf_gpu_server_load stream-uring-attach
 ./build/vllm_mixed_uring_loop Qwen/Qwen2.5-0.5B-Instruct 120
 ~~~
 
@@ -201,10 +221,10 @@ rewriting model-specific attention/matrix kernels.
 | Path | Purpose |
 |---|---|
 | bpf/ | Framing, admission, sockmap and io_uring BPF coordination |
-| bpf/include/bpfusion_queue.h | Shared kernel/GPU ABI |
+| bpf/include/bpf_gpu_server_queue.h | Shared kernel/GPU ABI |
 | executor/ | Reused compute adapters, resident dispatch and shared transport |
 | tools/llm_tcp_client.py | Text-to-token TCP/HTTP demo |
-| tools/bpfusion_load.c | Attach, stats and detach |
+| tools/bpf_gpu_server_load.c | Attach, stats and detach |
 | module/ | Legacy TCP transport |
 | tests/, bench/ | Correctness and controlled benchmarks |
 | docs/findings/, bench/results/ | Findings and reproducible evidence |
@@ -234,5 +254,5 @@ create no other branches.
 ## License
 
 Apache-2.0 — see [LICENSE](LICENSE). The separately loaded kernel module
-`module/bfusion_tx.c` is GPL-2.0-only, as marked in its SPDX header; it uses
+`module/bpf_gpu_server_tx.c` is GPL-2.0-only, as marked in its SPDX header; it uses
 GPL-exported Linux TCP internals and does not link into the userspace objects.

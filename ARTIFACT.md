@@ -8,6 +8,11 @@ It does not edit paper prose/PDF. Paths are relative to the
 source root; programs locate that root from their own file, so the directory
 and remote repository may be renamed.
 
+Current source/command names follow the [rename mapping](README.md). Archived
+raw filenames, embedded source snapshots and historical finding commands retain
+their original names. The offline replay uses those files directly; do not
+rename archived inputs or substitute renamed source into a historical run.
+
 ## One-command offline replay
 
 Prepare Python3.12 and plotting dependencies once while online:
@@ -65,7 +70,7 @@ Perf is the explicit single-pair exception.
 | Table3 NODELAY:40.5→2.3ms;8842→11260token/s | [0070](docs/findings/0070-tcp-nodelay.md) | tcp_nodelay_20261016/tcp_full/full.jsonl.gz | tcp_analysis.py,closed16/kernel before-after |
 | Table3 EOF:4157→0 failures/57600;7793→11623token/s | [0072](docs/findings/0072-connection-reclamation.md) | connection_reclamation_20261016/verified_reclaim_full/ clients/resources/receipts | reclaim_analysis.py |
 | Table3 active wait:1.70→.63ms CPU | [0074](docs/findings/0074-active-admission-wait.md) | active_admission_wait_20261016/active_wait_full/ | active_wait_analysis.py |
-| Table3 mixed scheduling:1.43→1.23ms,−14% | [0065](docs/findings/0065-mixed-prefill-decode.md) | mixed_batching_20261015/full_qwen.jsonl plus matching GPU/reference/fresh-metadata JSONLs | analyze.py,Qwen96/s,equally BF_TRACE |
+| Table3 mixed scheduling:1.43→1.23ms,−14% | [0065](docs/findings/0065-mixed-prefill-decode.md) | mixed_batching_20261015/full_qwen.jsonl plus matching GPU/reference/fresh-metadata JSONLs | analyze.py,Qwen96/s,equally BGS_TRACE |
 | Table3 slots:3337→217ms | 0080 | Table1 bottom | shared capacity,not eBPF gain |
 | Abstract >3.4M final requests;graph3.12M;screen2.52M/60cells;confirmation600000 | 0078,0080,0081 | final matrices above plus graph screen/ original records | replay counts3,465,600,excluding warmups/retired prefixes |
 | Approx15× slot tail/17× NODELAY tail | 0080,0070 | corresponding paired matrices | exact15.354/17.689;approximate prose tolerance1;tables half printed unit |
@@ -90,7 +95,7 @@ python3 bench/results/kernel_cpu_profile_20261016/profile_summary.py \
 ~~~
 
 Figure1 is a source schematic, not a data plot. Its claims map to
-bpf/fusion.bpf.c, bpf/kernel_tcp.bpf.c, executor/kernel_tcp.h,
+bpf/server.bpf.c, bpf/kernel_tcp.bpf.c, executor/kernel_tcp.h,
 executor/vllm_mixed.cu, executor/graph_server.cu and the
 [architecture contract](docs/architecture.md). Timer60000ns,24-byte framing
 and64-word maximum are code/ABI facts. Workload metadata is checked by replay.
@@ -187,10 +192,10 @@ RUN is a new private output directory and BUILD its build directory.
 Use the matching Python environment and library paths.
 
 ~~~sh
-make BUILD="$BUILD" "$BUILD/fusion.bpf.o" "$BUILD/bpfusion_load" \
+make BUILD="$BUILD" "$BUILD/server.bpf.o" "$BUILD/bpf_gpu_server_load" \
   graph-server-kernel-network graph-server-user-network-wait graph-network-client
-"$BUILD/bpfusion_load" stream-uring-attach
-BF_BIND="$SERVER_IP" python3 examples/torch_graph_server.py \
+"$BUILD/bpf_gpu_server_load" stream-uring-attach
+BGS_BIND="$SERVER_IP" python3 examples/torch_graph_server.py \
   "$BUILD/graph_server_kernel_network.so" fft --repeat 1 --seconds 600
 ~~~
 
@@ -227,17 +232,21 @@ qualified stack,near1000rps confirmation,CPU ratios near1 with broad intervals.
 No guaranteed P99 sign or production tolerance. Both transports first
 saturated at16000 after4000. The4-cell smoke is the short correctness version.
 
+The LLM smoke also accepts the pinned SmolLM2-135M snapshot using the same
+--model argument and four conditions; it selects that checkpoint’s archived
+prompt/output references rather than applying Qwen token IDs.
+
 ### LLM final matrices:Table1/capacity
 
 ~~~sh
 hf download Qwen/Qwen2.5-0.5B-Instruct \
   --revision 7ae557604adf67be50417f59c2c2f167def9a775 --local-dir ../models/qwen
-make BUILD="$BUILD16" CPPFLAGS=-DBF_LLM_SLOTS=16 \
-  "$BUILD16/fusion.bpf.o" "$BUILD16/bpfusion_load" \
+make BUILD="$BUILD16" CPPFLAGS=-DBGS_LLM_SLOTS=16 \
+  "$BUILD16/server.bpf.o" "$BUILD16/bpf_gpu_server_load" \
   vllm-mixed-kernel-network vllm-mixed-user-network-wait
-make BUILD="$BUILD32" CPPFLAGS=-DBF_LLM_SLOTS=32 \
-  "$BUILD32/fusion.bpf.o" "$BUILD32/bpfusion_load" vllm-mixed-user-network-wait
-BF_BIND="$SERVER_IP" PYTHONPATH=executor \
+make BUILD="$BUILD32" CPPFLAGS=-DBGS_LLM_SLOTS=32 \
+  "$BUILD32/server.bpf.o" "$BUILD32/bpf_gpu_server_load" vllm-mixed-user-network-wait
+BGS_BIND="$SERVER_IP" PYTHONPATH=executor \
   "$BUILD16/vllm_mixed_user_network_wait" ../models/qwen 600
 ~~~
 
@@ -298,7 +307,7 @@ the contemporaneous commit ID when candidates were private before integration.
 
 | Group | Original acquisition entrypoint under R | Protocol,time,expected scale |
 |---|---|---|
-| Mixed0065 | mixed_batching_20261015/load.py --model "$MODEL" --output "$RUN/full_qwen.jsonl";archived original/mixed constructors,16-bank BF_TRACE builds;--preflight uses32attempts/cell | 4conditions×2rates96/192×5blocks×256;Qwen and Smol originally;1–2h;Qwen96 TPOT≈1.43→1.23ms,native also improves |
+| Mixed0065 | mixed_batching_20261015/load.py --model "$MODEL" --output "$RUN/full_qwen.jsonl";archived original/mixed constructors,16-bank BGS_TRACE builds;--preflight uses32attempts/cell | 4conditions×2rates96/192×5blocks×256;Qwen and Smol originally;1–2h;Qwen96 TPOT≈1.43→1.23ms,native also improves |
 | NODELAY0070 | tcp_nodelay_20261016/tcp_nodelay.py --output "$RUN/full.jsonl";before/after nodelay_build.py;--preflight32attempts/cell with diagnostic packets | 5blocks×4conditions×2regimes×256=10240requests;30–60min;closed16gap≈40→2–3ms,CPU rises |
 | Reclamation0072 | connection_reclamation_20261016/reclamation_server.py,verified_reclaim_build.py and the [plan](bench/results/connection_reclamation_20261016/plan.md) | global/local/native15×60s/192rps;1–2h;historical4157timeouts→0,count varies;global guard is a defined ablation |
 | Active wait0074 | active_admission_wait_20261016/run_active_wait_matrix.ps1 and active_wait_server.py;uring_loop.before.bpf.c vs uring_loop.candidate.bpf.c,same16-slot GPU SASS | 15×60s/172800attempts;1–2h;CPU≈1.70→.63ms;earlier18.7% native gap did not reproduce in final path |

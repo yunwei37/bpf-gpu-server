@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-# BPFusion: resident LLM executor.
+# bpf-gpu-server: resident LLM executor.
 #
 # Keeps Qwen loaded on the GPU and spins on the pinned BPF page's LLM ring. For
 # each PENDING slot it tokenizes are already-decoded ids from the page, runs
@@ -15,34 +15,34 @@ import argparse, ctypes, mmap, os, socket, struct, sys, threading, time
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-SYSFS = "/sys/fs/bpf/bpfusion_ctl"
+SYSFS = "/sys/fs/bpf/bgs_ctl"
 
-BF_LLM_SLOTS = 8
-BF_LLM_MAX_TOK = 64
-BF_LLM_TCP_PORT = 39403
+BGS_LLM_SLOTS = 8
+BGS_LLM_MAX_TOK = 64
+BGS_LLM_TCP_PORT = 39403
 
-# Must match struct bf_llm_slot in bpf/include/bpfusion_queue.h, in order.
+# Must match struct bgs_llm_slot in bpf/include/bpf_gpu_server_queue.h, in order.
 #   u32 state, n_gen, n_prompt, produced, addr_be; u16 port_be, pad;
 #   u64 client_ns, ingress_ns, gpu_done_ns; u32 tok_in[64]; u32 tok_out[64];
 LLM_SLOT_FMT = "<IIIIIHHQQQ64I64I"
 LLM_SLOT_SIZE = struct.calcsize(LLM_SLOT_FMT)
 assert LLM_SLOT_SIZE == 4 * 5 + 4 + 24 + 256 + 256, LLM_SLOT_SIZE
 
-# struct bf_page: 9 u32 + u64 stop_ns, then slots/peers/done, then llm_head.
+# struct bgs_page: 9 u32 + u64 stop_ns, then slots/peers/done, then llm_head.
 # Offsets of the LLM ring are computed from the C-layout sizes.
 CTL_SLOT_SIZE = 4 + 4 + 8 + 8 + 16 * 4           # state,id,client,ingress,x[]
 DONE_SLOT_SIZE = 4 + 4 + 8 + 8 + 8 + 8 + 16 * 4  # id,state,client,ingress,start,done,y[]
 PEER_SIZE = 8
-BF_SLOTS = 64
+BGS_SLOTS = 64
 PAGE_HDR = 9 * 4 + 4 + 8                         # 9 u32s, 4 pad, u64 stop_ns
-LLM_HEAD_OFF = PAGE_HDR + BF_SLOTS * (CTL_SLOT_SIZE + PEER_SIZE + DONE_SLOT_SIZE)
+LLM_HEAD_OFF = PAGE_HDR + BGS_SLOTS * (CTL_SLOT_SIZE + PEER_SIZE + DONE_SLOT_SIZE)
 LLM_RING_OFF = LLM_HEAD_OFF + 8                  # llm_head(4) + llm_reserved(4)
-PAGE_BYTES = LLM_RING_OFF + BF_LLM_SLOTS * LLM_SLOT_SIZE
+PAGE_BYTES = LLM_RING_OFF + BGS_LLM_SLOTS * LLM_SLOT_SIZE
 MAP_BYTES = (PAGE_BYTES + 4095) // 4096 * 4096
 
-BF_PENDING = 1
-BF_FREE = 0
-BF_DONE = 2
+BGS_PENDING = 1
+BGS_FREE = 0
+BGS_DONE = 2
 
 # The reference CPU bridge must preserve concurrent producer reservations when
 # recycling a slot, just like kernel TX. GCC's native atomic operation also
@@ -58,7 +58,7 @@ def open_page():
     fd = libbpf.bpf_obj_get(SYSFS.encode())
     if fd < 0:
         sys.exit(f"bpf_obj_get({SYSFS}): errno {ctypes.get_errno()} "
-                 "(run bpfusion_load attach)")
+                 "(run bpf_gpu_server_load attach)")
     buf = mmap.mmap(fd, MAP_BYTES, mmap.MAP_SHARED,
                     mmap.PROT_READ | mmap.PROT_WRITE)
     return buf, ctypes.addressof(ctypes.c_char.from_buffer(buf))
@@ -92,11 +92,11 @@ class Page:
     def finish(self, idx):
         off = LLM_RING_OFF + idx * LLM_SLOT_SIZE
         struct.pack_into("<Q", self.mm, off + 40, time.monotonic_ns())
-        struct.pack_into("<I", self.mm, off, BF_DONE)
+        struct.pack_into("<I", self.mm, off, BGS_DONE)
 
     def recycle(self, idx):
         off = LLM_RING_OFF + idx * LLM_SLOT_SIZE        # state
-        struct.pack_into("<I", self.mm, off, BF_FREE)
+        struct.pack_into("<I", self.mm, off, BGS_FREE)
         _release_reservation(self.base + LLM_HEAD_OFF,
                              ctypes.c_uint64(~(1 << (32 + idx))).value, 3)
 
@@ -128,7 +128,7 @@ def main():
                     help="stream tokens back over the request's TCP socket")
     ap.add_argument("--tcp-bind", default="0.0.0.0")
     ap.add_argument("--no-send", action="store_true",
-                    help="do not send() from userspace; the bfusion_tx kernel "
+                    help="do not send() from userspace; the bpf_gpu_server_tx kernel "
                          "module transmits the reply (module/kmod)")
     a = ap.parse_args()
 
@@ -152,12 +152,12 @@ def main():
     if a.tcp:
         lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         lsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        lsock.bind((a.tcp_bind, BF_LLM_TCP_PORT))
+        lsock.bind((a.tcp_bind, BGS_LLM_TCP_PORT))
         lsock.listen(64)
         threading.Thread(target=tcp_accept_loop,
                          args=(lsock, conns, conns_lock, stop),
                          daemon=True).start()
-        print(f"executor: TCP listener on {a.tcp_bind}:{BF_LLM_TCP_PORT}",
+        print(f"executor: TCP listener on {a.tcp_bind}:{BGS_LLM_TCP_PORT}",
               flush=True)
 
     def generate(prompt_ids, n_gen):
@@ -182,12 +182,12 @@ def main():
         head = page.u32(LLM_HEAD_OFF)
         if head == seen:
             continue
-        if head - seen > BF_LLM_SLOTS:
-            seen = head - BF_LLM_SLOTS
-        idx = seen % BF_LLM_SLOTS
+        if head - seen > BGS_LLM_SLOTS:
+            seen = head - BGS_LLM_SLOTS
+        idx = seen % BGS_LLM_SLOTS
         (state, n_gen, n_prompt, produced, addr_be, port_be, pad,
          client_ns, ingress_ns, gpu_done_ns, tok_in, tok_out) = page.slot(idx)
-        if state != BF_PENDING:
+        if state != BGS_PENDING:
             # Head reserves this sequence before its producer publishes PENDING.
             continue
         prompt = list(tok_in[:n_prompt])

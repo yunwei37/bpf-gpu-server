@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// BPFusion: kernel-side ingress.
+// bpf-gpu-server: kernel-side ingress.
 //
 // A tc/clsact ingress program on the loopback device (the real ingress hook,
 // same place a NIC's XDP-redirect path would land). For every well-formed
@@ -23,7 +23,7 @@
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_core_read.h>
 #include <bpf/bpf_endian.h>
-#include "bpfusion_admission.h"
+#include "bpf_gpu_server_admission.h"
 
 
 #ifndef TC_ACT_OK
@@ -57,7 +57,7 @@ static __always_inline void bump(__u32 key)
 
 /* LLM request: header magic + n_prompt + n_gen + client_ns, then n_prompt
  * little-endian token ids. Written into the LLM ring; the executor generates. */
-union bf_llm_hdr {
+union bgs_llm_hdr {
 	struct {
 		__u32 magic;
 		__u32 n_prompt;
@@ -74,18 +74,18 @@ union bf_llm_hdr {
 static __always_inline int llm_fill(struct __sk_buff *skb, __u32 payload,
 				     __u32 addr_be, __u16 port_be, __u16 flags)
 {
-	struct bf_page *p;
-	struct bf_llm_slot *s;
-	union bf_llm_hdr h;
-	__u32 tokens[BF_LLM_MAX_TOK] = {}, zero = 0, i;
+	struct bgs_page *p;
+	struct bgs_llm_slot *s;
+	union bgs_llm_hdr h;
+	__u32 tokens[BGS_LLM_MAX_TOK] = {}, zero = 0, i;
 
 	if (bpf_skb_load_bytes(skb, payload, &h, sizeof(h)) != 0)
 		return TC_ACT_OK;
-	if (h.magic != BF_LLM_MAGIC)
+	if (h.magic != BGS_LLM_MAGIC)
 		return TC_ACT_OK;
-	if (h.n_prompt == 0 || h.n_prompt > BF_LLM_MAX_TOK)
+	if (h.n_prompt == 0 || h.n_prompt > BGS_LLM_MAX_TOK)
 		return TC_ACT_OK;
-	if (h.n_gen == 0 || h.n_gen > BF_LLM_MAX_TOK)
+	if (h.n_gen == 0 || h.n_gen > BGS_LLM_MAX_TOK)
 		return TC_ACT_OK;
 	bump(7); /* llm magic */
 
@@ -94,7 +94,7 @@ static __always_inline int llm_fill(struct __sk_buff *skb, __u32 payload,
 		return TC_ACT_OK;
 	payload += sizeof(h);
 #pragma unroll
-	for (i = 0; i < BF_LLM_MAX_TOK; i++) {
+	for (i = 0; i < BGS_LLM_MAX_TOK; i++) {
 		if (i < h.n_prompt &&
 		    bpf_skb_load_bytes(skb, payload + i * 4,
 				       &tokens[i], 4) != 0)
@@ -106,7 +106,7 @@ static __always_inline int llm_fill(struct __sk_buff *skb, __u32 payload,
 		bump(8); /* llm busy */
 		return TC_ACT_OK;
 	}
-	for (i = 0; i < BF_LLM_MAX_TOK; i++) s->tok_in[i] = tokens[i];
+	for (i = 0; i < BGS_LLM_MAX_TOK; i++) s->tok_in[i] = tokens[i];
 	s->n_prompt = h.n_prompt;
 	s->n_gen = h.n_gen;
 	s->produced = 0;
@@ -115,7 +115,7 @@ static __always_inline int llm_fill(struct __sk_buff *skb, __u32 payload,
 	s->port_be = port_be;
 	s->client_ns = h.client_ns;
 	s->ingress_ns = bpf_ktime_get_ns();
-	s->state = BF_PENDING;
+	s->state = BGS_PENDING;
 	return TC_ACT_OK;
 }
 
@@ -134,12 +134,12 @@ static __always_inline int llm_ingress_tcp(struct __sk_buff *skb, __u32 payload,
 SEC("classifier")
 int ingress(struct __sk_buff *skb)
 {
-	struct bf_page *p;
-	struct bf_req_hdr h;
+	struct bgs_page *p;
+	struct bgs_req_hdr h;
 	struct iphdr ip;
 	struct udphdr udp;
 	__u32 head, idx, zero = 0, l4;
-	struct bf_ctl_slot *s;
+	struct bgs_ctl_slot *s;
 	void *d;
 
 	bump(0); /* seen */
@@ -164,14 +164,14 @@ int ingress(struct __sk_buff *skb)
 			return TC_ACT_OK;
 		/* Only the first payload segment matters: the client sends the
 		 * whole LLM request in one write. */
-		if (tcp.dest != bpf_htons(BF_LLM_TCP_PORT))
+		if (tcp.dest != bpf_htons(BGS_LLM_TCP_PORT))
 			return TC_ACT_OK;
 		bump(9); /* tcp dest match */
 		thl = (__u32)(tcp.doff * 4);
 		if (bpf_skb_load_bytes(skb, l4 + thl, &h,
 				       sizeof(h.magic)) != 0)
 			return TC_ACT_OK;
-		if (h.magic != BF_LLM_MAGIC)
+		if (h.magic != BGS_LLM_MAGIC)
 			return TC_ACT_OK;
 		bump(10); /* tcp magic */
 		return llm_ingress_tcp(skb, l4 + thl, &tcp, &ip);
@@ -179,15 +179,15 @@ int ingress(struct __sk_buff *skb)
 	l4 = 14 + (__u32)(ip.ihl * 4);
 	if (bpf_skb_load_bytes(skb, l4, &udp, sizeof(udp)) != 0)
 		return TC_ACT_OK;
-	if (udp.dest == bpf_htons(BF_LLM_PORT))
+	if (udp.dest == bpf_htons(BGS_LLM_PORT))
 		return llm_ingress(skb, l4, &udp, &ip);
-	if (udp.dest != bpf_htons(BF_PORT))
+	if (udp.dest != bpf_htons(BGS_PORT))
 		return TC_ACT_OK;
 	bump(1); /* ip+udp */
 
 	if (bpf_skb_load_bytes(skb, l4 + sizeof(udp), &h, sizeof(h)) != 0)
 		return TC_ACT_OK;
-	if (h.magic != BF_MAGIC)
+	if (h.magic != BGS_MAGIC)
 		return TC_ACT_OK;
 	bump(2); /* magic */
 
@@ -196,15 +196,15 @@ int ingress(struct __sk_buff *skb)
 		return TC_ACT_OK;
 
 	head = p->head;
-	idx = head % BF_SLOTS;
+	idx = head % BGS_SLOTS;
 	s = &p->slots[idx];
-	if (s->state != BF_FREE || p->done[idx].state != BF_FREE) {
+	if (s->state != BGS_FREE || p->done[idx].state != BGS_FREE) {
 		p->drops++;
 		bump(3);
-		bump(s->state != BF_FREE ? 5 : 6); /* 5: ctl busy, 6: done busy */
+		bump(s->state != BGS_FREE ? 5 : 6); /* 5: ctl busy, 6: done busy */
 		goto out;
 	}
-	/* bf_req_hdr: magic(4) pad(4) client_ns(8), then x[] at offset 16. */
+	/* bgs_req_hdr: magic(4) pad(4) client_ns(8), then x[] at offset 16. */
 	if (bpf_skb_load_bytes(skb, l4 + sizeof(udp) + 16, s->x,
 			       sizeof(s->x)) != 0)
 		goto out;
@@ -213,7 +213,7 @@ int ingress(struct __sk_buff *skb)
 	s->ingress_ns = bpf_ktime_get_ns();
 	p->peers[idx].addr_be = ip.saddr;
 	p->peers[idx].port_be = udp.source;
-	s->state = BF_PENDING;
+	s->state = BGS_PENDING;
 	__sync_fetch_and_add(&p->head, 1);
 	bump(4); /* published */
 out:
@@ -225,11 +225,11 @@ out:
 
 
 /* TCP sequencing/reassembly precedes this stream parser. */
-struct bf_flow { __u32 local, remote, local_port, remote_port; };
+struct bgs_flow { __u32 local, remote, local_port, remote_port; };
 struct {
     __uint(type, BPF_MAP_TYPE_SOCKHASH);
-    __uint(max_entries, BF_SLOTS);
-    __type(key, struct bf_flow);
+    __uint(max_entries, BGS_SLOTS);
+    __type(key, struct bgs_flow);
     __type(value, __u32);
 } streams SEC(".maps");
 
@@ -237,13 +237,13 @@ SEC("sockops")
 int stream_sockops(struct bpf_sock_ops *ctx)
 {
     if (ctx->op == BPF_SOCK_OPS_PASSIVE_ESTABLISHED_CB &&
-        ctx->family == 2 && ctx->local_port == BF_LLM_TCP_PORT) {
-        struct bf_flow key = { ctx->local_ip4, ctx->remote_ip4,
+        ctx->family == 2 && ctx->local_port == BGS_LLM_TCP_PORT) {
+        struct bgs_flow key = { ctx->local_ip4, ctx->remote_ip4,
                               ctx->local_port, ctx->remote_port };
         int error=bpf_sock_hash_update(ctx, &streams, &key, BPF_NOEXIST);
         if (error) {
             __u32 zero=0;
-            struct bf_page *page=bpf_map_lookup_elem(&ctl,&zero);
+            struct bgs_page *page=bpf_map_lookup_elem(&ctl,&zero);
             if(page)__sync_val_compare_and_swap(&page->admission_pad,0,(__u32)-error);
             bump(13);
         }
@@ -288,7 +288,7 @@ __noinline int http_step(struct http_scan *s, __u8 c)
             s->reading=1;
         } else if (s->reading) {
             if (c>='0' && c<='9') {
-                if (s->value>sizeof(union bf_llm_hdr)+BF_LLM_MAX_TOK*4) { s->error=1; return 1; }
+                if (s->value>sizeof(union bgs_llm_hdr)+BGS_LLM_MAX_TOK*4) { s->error=1; return 1; }
                 s->value=s->value*10+c-'0'; s->digits=1;
             } else if (c!=' ' && c!='\t' && c!='\r') { s->error=1; return 1; }
         }
@@ -317,7 +317,7 @@ static long http_byte(__u32 off, void *opaque)
 static __always_inline int frame_info(struct __sk_buff *skb, __u32 *body, __u16 *http)
 {
     __u32 magic, offset=stream_offset(skb);
-    union bf_llm_hdr h;
+    union bgs_llm_hdr h;
     *body=0; *http=0;
     if (offset>skb->len) return -1;
     __u32 available=skb->len-offset;
@@ -328,13 +328,13 @@ static __always_inline int frame_info(struct __sk_buff *skb, __u32 *body, __u16 
         if (bpf_loop(available,http_byte,&ctx,0)<0 || scan->error) return -1;
         if (!scan->end) return 0;
         if (!scan->have_length || scan->length<sizeof(h) ||
-            scan->length>sizeof(h)+BF_LLM_MAX_TOK*4) return -1;
+            scan->length>sizeof(h)+BGS_LLM_MAX_TOK*4) return -1;
         *body=scan->end; *http=1;
         return scan->end+scan->length;
     }
     if (available<sizeof(h) || bpf_skb_load_bytes(skb,offset,&h,sizeof(h))) return 0;
-    if (h.magic!=BF_LLM_MAGIC || !h.n_prompt || h.n_prompt>BF_LLM_MAX_TOK ||
-        !h.n_gen || h.n_gen>BF_LLM_MAX_TOK) return -1;
+    if (h.magic!=BGS_LLM_MAGIC || !h.n_prompt || h.n_prompt>BGS_LLM_MAX_TOK ||
+        !h.n_gen || h.n_gen>BGS_LLM_MAX_TOK) return -1;
     return sizeof(h)+h.n_prompt*4;
 }
 SEC("sk_skb/stream_parser")
@@ -352,34 +352,34 @@ struct {
     __uint(type,BPF_MAP_TYPE_ARRAY);
     __uint(max_entries,1);
     __type(key,__u32);
-    __type(value,struct bf_uring_context);
+    __type(value,struct bgs_uring_context);
 } uring_owner SEC(".maps");
 
 static __always_inline int stream_dispatch(struct __sk_buff *skb, int queued)
 {
-    union bf_llm_hdr h;
-    struct bf_llm_pending request={};
+    union bgs_llm_hdr h;
+    struct bgs_llm_pending request={};
     __u32 zero=0, body, offset=stream_offset(skb);
     __u16 http;
     int length=frame_info(skb,&body,&http);
     if (length<=0 || offset>skb->len || length>skb->len-offset ||
         bpf_skb_load_bytes(skb,offset+body,&h,sizeof(h)) ||
-        h.magic!=BF_LLM_MAGIC || length!=body+sizeof(h)+h.n_prompt*4 ||
-        !h.n_prompt || h.n_prompt>BF_LLM_MAX_TOK ||
-        !h.n_gen || h.n_gen>BF_LLM_MAX_TOK) return SK_DROP;
+        h.magic!=BGS_LLM_MAGIC || length!=body+sizeof(h)+h.n_prompt*4 ||
+        !h.n_prompt || h.n_prompt>BGS_LLM_MAX_TOK ||
+        !h.n_gen || h.n_gen>BGS_LLM_MAX_TOK) return SK_DROP;
 #pragma unroll
-    for (__u32 i=0;i<BF_LLM_MAX_TOK;i++)
+    for (__u32 i=0;i<BGS_LLM_MAX_TOK;i++)
         if (i<h.n_prompt && bpf_skb_load_bytes(skb,offset+body+sizeof(h)+i*4,&request.tokens[i],4)) return SK_DROP;
-    struct bf_page *p=bpf_map_lookup_elem(&ctl,&zero);
+    struct bgs_page *p=bpf_map_lookup_elem(&ctl,&zero);
     if (!p || *(volatile __u64 *)&p->stop_ns) return SK_DROP;
     request.n_prompt=h.n_prompt; request.n_gen=h.n_gen;
-    request.flags=(http ? 2 : 1) | BF_LLM_VALIDATING;
+    request.flags=(http ? 2 : 1) | BGS_LLM_VALIDATING;
     request.addr_be=skb->remote_ip4; request.port_be=(__u16)(skb->remote_port>>16);
     request.client_ns=h.client_ns; request.ingress_ns=bpf_ktime_get_ns();
     if (queued) {
         /* Count before publishing so EOF cannot recycle a connection while
          * one of its requests is waiting outside the model's eight slots. */
-        __u32 bucket=bf_pending_bucket(request.addr_be,request.port_be);
+        __u32 bucket=bgs_pending_bucket(request.addr_be,request.port_be);
         __sync_fetch_and_add(&p->llm_peer_pending[bucket],1);
         __sync_fetch_and_add(&p->llm_queued,1);
         if (bpf_map_push_elem(&pending,&request,BPF_ANY)) {
@@ -388,13 +388,13 @@ static __always_inline int stream_dispatch(struct __sk_buff *skb, int queued)
             bump(8); __sync_fetch_and_add(&p->drops,1); return SK_DROP;
         }
     } else {
-        struct bf_llm_slot *slot=llm_reserve(p);
+        struct bgs_llm_slot *slot=llm_reserve(p);
         if (!slot) { bump(8); __sync_fetch_and_add(&p->drops,1); return SK_DROP; }
         llm_publish(slot,&request);
     }
     bump(11);
     /* Preserve qualified sockmap/TCP receive-cursor accounting. */
-    struct bf_flow key={skb->local_ip4,skb->remote_ip4,skb->local_port,skb->remote_port};
+    struct bgs_flow key={skb->local_ip4,skb->remote_ip4,skb->local_port,skb->remote_port};
     return bpf_sk_redirect_hash(skb,&streams,&key,BPF_F_INGRESS);
 }
 SEC("sk_skb/stream_verdict")
@@ -406,7 +406,7 @@ SEC("sk_skb/stream_verdict")
 int stream_uring_publish(struct __sk_buff *skb)
 {
     __u32 zero=0;
-    struct bf_uring_context *owner=bpf_map_lookup_elem(&uring_owner,&zero);
+    struct bgs_uring_context *owner=bpf_map_lookup_elem(&uring_owner,&zero);
     return stream_dispatch(skb,owner && owner->pad);
 }
 
@@ -416,7 +416,7 @@ SEC("tracepoint/io_uring/io_uring_create")
 int uring_bind(struct trace_event_raw_io_uring_create *ctx)
 {
     __u32 zero=0;
-    struct bf_uring_context *owner=bpf_map_lookup_elem(&uring_owner,&zero);
+    struct bgs_uring_context *owner=bpf_map_lookup_elem(&uring_owner,&zero);
     struct bpf_pidns_info ns={};
     if(owner && !bpf_get_ns_current_pid_tgid(owner->nsdev,owner->nsino,&ns,sizeof(ns)) && owner->pid==ns.tgid)
         __sync_val_compare_and_swap(&owner->ring,0,(__u64)ctx->ctx);
@@ -426,19 +426,19 @@ SEC("tracepoint/io_uring/io_uring_complete")
 int uring_recycle(struct trace_event_raw_io_uring_complete *ctx)
 {
     __u32 zero=0;
-    struct bf_uring_context *owner=bpf_map_lookup_elem(&uring_owner,&zero);
+    struct bgs_uring_context *owner=bpf_map_lookup_elem(&uring_owner,&zero);
     if(!owner || !owner->ring || owner->ring!=(__u64)ctx->ctx)return 0;
     __u64 tag=ctx->user_data;__u32 prefix=tag>>48;
-    if(prefix!=BF_IO_SEND_TAG && prefix!=BF_IO_ABORT_TAG)return 0;
+    if(prefix!=BGS_IO_SEND_TAG && prefix!=BGS_IO_ABORT_TAG)return 0;
     __u32 length=(tag>>32)&0xffff,sequence=(__u32)tag;
-    if((prefix==BF_IO_SEND_TAG && (!length || ctx->res!=length)) ||
-       (prefix==BF_IO_ABORT_TAG && ctx->res!=0))return 0;
-    struct bf_page *page=bpf_map_lookup_elem(&ctl,&zero);
+    if((prefix==BGS_IO_SEND_TAG && (!length || ctx->res!=length)) ||
+       (prefix==BGS_IO_ABORT_TAG && ctx->res!=0))return 0;
+    struct bgs_page *page=bpf_map_lookup_elem(&ctl,&zero);
     if(!page)return 0;
-    __u32 index=sequence%BF_LLM_SLOTS;
-    struct bf_llm_slot *slot=&page->llm[index];
-    if(slot->state!=BF_DONE)return 0;
-    slot->state=BF_FREE;
+    __u32 index=sequence%BGS_LLM_SLOTS;
+    struct bgs_llm_slot *slot=&page->llm[index];
+    if(slot->state!=BGS_DONE)return 0;
+    slot->state=BGS_FREE;
     __sync_fetch_and_and(&page->llm_admission,~(1ULL<<(32+index)));
     bump(4);
     return 0;

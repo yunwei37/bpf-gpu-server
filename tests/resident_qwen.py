@@ -53,26 +53,26 @@ def main():
     parser.add_argument("--prefill-edges",action="store_true",help="also test 1/15/16/17/32/64-token prompt lengths")
     parser.add_argument("--model",default="Qwen/Qwen2.5-0.5B-Instruct",help="HF checkpoint; other models require a graph executor")
     args=parser.parse_args()
-    server=(os.environ.get("BF_BIND","127.0.0.1"),39403)
+    server=(os.environ.get("BGS_BIND","127.0.0.1"),39403)
     user_network=Path(args.executor).name in ("qwen_graph_user_network","qwen_graph_user_network_wait")
     if args.model!="Qwen/Qwen2.5-0.5B-Instruct" and Path(args.executor).name not in ("qwen_graph","qwen_graph_host_launch","qwen_graph_user_network","qwen_graph_user_network_wait"):
         parser.error("--model requires qwen_graph or qwen_graph_host_launch")
-    weights="/workspaces/.cache/bpfusion/qwen25-05b-fp16.bin" if args.model=="Qwen/Qwen2.5-0.5B-Instruct" else args.model
+    weights="/workspaces/.cache/bpf-gpu-server/qwen25-05b-fp16.bin" if args.model=="Qwen/Qwen2.5-0.5B-Instruct" else args.model
     cases,vocab=oracle_cases(args.gen,args.prefill_edges,args.model)
     valid=305+3*len(cases)
     print(f"HF eager fp16 oracle ready, model={args.model}, model released",flush=True)
-    subprocess.run(["./build/bpfusion_load","detach","lo"],check=True)
-    subprocess.run(["./build/bpfusion_load","stream-detach"],check=True)
+    subprocess.run(["./build/bpf_gpu_server_load","detach","lo"],check=True)
+    subprocess.run(["./build/bpf_gpu_server_load","stream-detach"],check=True)
     if not user_network:
-        subprocess.run(["./build/bpfusion_load","stream-attach"],check=True)
+        subprocess.run(["./build/bpf_gpu_server_load","stream-attach"],check=True)
     else:
-        assert not Path("/sys/module/bfusion_tx").exists(),"kernel TX must be absent for userspace control"
+        assert not Path("/sys/module/bpf_gpu_server_tx").exists(),"kernel TX must be absent for userspace control"
     executor=None
     complete=False
-    logpath="/tmp/bpfusion-resident-qwen.log"
+    logpath="/tmp/bpf-gpu-server-resident-qwen.log"
     try:
         with open(logpath,"w") as log:
-            executor=subprocess.Popen(["strace","-D","-f","-e","trace=network,write","-o","/tmp/bpfusion-qwen-network.trace",args.executor,weights,"300"],stdout=log,stderr=subprocess.STDOUT)
+            executor=subprocess.Popen(["strace","-D","-f","-e","trace=network,write","-o","/tmp/bpf-gpu-server-qwen-network.trace",args.executor,weights,"300"],stdout=log,stderr=subprocess.STDOUT)
         while "resident Qwen ready" not in open(logpath).read():
             if executor.poll() is not None:
                 raise AssertionError(open(logpath).read())
@@ -224,7 +224,7 @@ def main():
                     if args.gen==64: assert "max_active=8" in log,log
                     print("PASS concurrent graph-bank accounting and zero graph errors",flush=True)
                 if complete: print("PASS expected CUDA launch count for the selected dispatch",flush=True)
-                trace=open("/tmp/bpfusion-qwen-network.trace").read()
+                trace=open("/tmp/bpf-gpu-server-qwen-network.trace").read()
                 if complete: assert "resident Qwen ready" in trace,"missing executor ready marker in trace"
                 if "resident Qwen ready" in trace:
                     active=trace.split("resident Qwen ready",1)[1]
@@ -232,17 +232,17 @@ def main():
                         for syscall in ("accept4","recvfrom","sendmsg"):
                             assert re.search(r"\b"+syscall+r"\(",active),syscall
                         assert "userspace TCP stopped: accepted=5058 published=594 completed=594 rejected=259" in log,log
-                        assert not Path("/sys/module/bfusion_tx").exists()
+                        assert not Path("/sys/module/bpf_gpu_server_tx").exists()
                         print("PASS traced userspace accept/receive/send control with no kernel TX module",flush=True)
                     else:
                         assert not re.search(r"\b(?:accept4?|recvfrom|recvmsg|recvmmsg|sendto|sendmsg|sendmmsg)\(",active),active
                         print("PASS traced all executor threads: no accept/receive/send syscalls after ready",flush=True)
             if not user_network:
-                subprocess.run(["./build/bpfusion_load","stats"],check=True)
+                subprocess.run(["./build/bpf_gpu_server_load","stats"],check=True)
         finally:
-            subprocess.run(["./build/bpfusion_load","stream-detach"],check=True)
-            subprocess.run(["./build/bpfusion_load","detach","lo"],check=True)
-            for name in ("bpfusion_ctl","bpfusion_stats","bpfusion_db"):
+            subprocess.run(["./build/bpf_gpu_server_load","stream-detach"],check=True)
+            subprocess.run(["./build/bpf_gpu_server_load","detach","lo"],check=True)
+            for name in ("bgs_ctl","bgs_stats","bgs_db"):
                 Path("/sys/fs/bpf",name).unlink(missing_ok=True)
             print("PASS test map pins removed after module shutdown and hook detach",flush=True)
 

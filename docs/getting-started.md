@@ -51,20 +51,20 @@ headers is not qualified by this walkthrough. The demonstrated x86-64 private
 library install layout is usr/lib64:
 
 ~~~sh
-bpfusion_deps="$(mktemp -d /tmp/bpfusion-deps.XXXXXX)"
+bgs_deps="$(mktemp -d /tmp/bpf-gpu-server-deps.XXXXXX)"
 curl -L https://codeload.github.com/libbpf/libbpf/tar.gz/refs/tags/v1.6.3 \
-  -o "$bpfusion_deps/libbpf.tar.gz"
-tar -xzf "$bpfusion_deps/libbpf.tar.gz" -C "$bpfusion_deps"
-make -C "$bpfusion_deps/libbpf-1.6.3/src" \
-  DESTDIR="$bpfusion_deps/install" install
-export LIBRARY_PATH="$bpfusion_deps/install/usr/lib64${LIBRARY_PATH:+:$LIBRARY_PATH}"
-export LD_LIBRARY_PATH="$bpfusion_deps/install/usr/lib64${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+  -o "$bgs_deps/libbpf.tar.gz"
+tar -xzf "$bgs_deps/libbpf.tar.gz" -C "$bgs_deps"
+make -C "$bgs_deps/libbpf-1.6.3/src" \
+  DESTDIR="$bgs_deps/install" install
+export LIBRARY_PATH="$bgs_deps/install/usr/lib64${LIBRARY_PATH:+:$LIBRARY_PATH}"
+export LD_LIBRARY_PATH="$bgs_deps/install/usr/lib64${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 export CUDA_HOME=/usr/local/cuda
 export PATH="$CUDA_HOME/bin:$PATH"
 
-python3 -m venv --without-pip "$bpfusion_deps/venv"
-python3 -m pip --python "$bpfusion_deps/venv/bin/python" install -r requirements.txt
-. "$bpfusion_deps/venv/bin/activate"
+python3 -m venv --without-pip "$bgs_deps/venv"
+python3 -m pip --python "$bgs_deps/venv/bin/python" install -r requirements.txt
+. "$bgs_deps/venv/bin/activate"
 export VLLM_ENABLE_V1_MULTIPROCESSING=0
 ~~~
 
@@ -76,7 +76,7 @@ loaded Torch runtime. System Python packages remain unchanged.
 ## Build and model
 
 ~~~sh
-make build/fusion.bpf.o build/bpfusion_load \
+make build/server.bpf.o build/bpf_gpu_server_load \
   vllm-mixed-uring-loop vllm-mixed-user-network-wait
 model="$(python3 -c 'from huggingface_hub import snapshot_download; print(snapshot_download("Qwen/Qwen2.5-0.5B-Instruct", revision="7ae557604adf67be50417f59c2c2f167def9a775"))')"
 ~~~
@@ -99,7 +99,7 @@ See the [ABI and EOF ownership contract](architecture.md#framing-queue-ownership
 ## Run the kernel-owned path
 
 ~~~sh
-./build/bpfusion_load stream-uring-attach
+./build/bpf_gpu_server_load stream-uring-attach
 ./build/vllm_mixed_uring_loop "$model" 120
 ~~~
 
@@ -111,7 +111,7 @@ resident vLLM ready:
 
 Its remainder contains actual dimensions. Bootstrap can take minutes.
 The 120 argument bounds serving time after bootstrap; Ctrl-C/SIGTERM stops the
-current server. This explicit BPF-loop target needs no bfusion_tx module.
+current server. This explicit BPF-loop target needs no bpf_gpu_server_tx module.
 The explicit mixed targets combine prefill and decode in the same upstream
 graph batch. Older vllm_graph and homogeneous/control targets remain available
 with their historical semantics; the plain vllm_graph target uses the legacy
@@ -139,9 +139,9 @@ fixed output count and need not stop at EOS.
 After the server has stopped:
 
 ~~~sh
-./build/bpfusion_load stats
-./build/bpfusion_load stream-detach
-rm -f /sys/fs/bpf/bpfusion_ctl /sys/fs/bpf/bpfusion_stats /sys/fs/bpf/bpfusion_db
+./build/bpf_gpu_server_load stats
+./build/bpf_gpu_server_load stream-detach
+rm -f /sys/fs/bpf/bgs_ctl /sys/fs/bpf/bgs_stats /sys/fs/bpf/bgs_db
 ~~~
 
 Remove the disposable dependency directory only after all processes using it
@@ -171,19 +171,19 @@ optimized official vLLM is406ms. All172800requests complete without failures.
 This is a shared capacity fix,not an eBPF-specific speed claim.
 
 ~~~sh
-make BUILD=build/mixed32 CPPFLAGS=-DBF_LLM_SLOTS=32 \
-  build/mixed32/fusion.bpf.o build/mixed32/bpfusion_load \
+make BUILD=build/mixed32 CPPFLAGS=-DBGS_LLM_SLOTS=32 \
+  build/mixed32/server.bpf.o build/mixed32/bpf_gpu_server_load \
   vllm-mixed-kernel-network vllm-mixed-user-network-wait
-./build/mixed32/bpfusion_load stream-uring-attach
+./build/mixed32/bpf_gpu_server_load stream-uring-attach
 ./build/mixed32/vllm_mixed_kernel_network "$model" 120
 ~~~
 
 Use the same token client. After the kernel server exits,clean its own pins:
 
 ~~~sh
-./build/mixed32/bpfusion_load stats
-./build/mixed32/bpfusion_load stream-detach
-rm -f /sys/fs/bpf/bpfusion_ctl /sys/fs/bpf/bpfusion_stats /sys/fs/bpf/bpfusion_db
+./build/mixed32/bpf_gpu_server_load stats
+./build/mixed32/bpf_gpu_server_load stream-detach
+rm -f /sys/fs/bpf/bgs_ctl /sys/fs/bpf/bgs_stats /sys/fs/bpf/bgs_db
 ~~~
 
 Then run the matching native alternative:
@@ -207,8 +207,8 @@ are not established by the fixed192/s comparison.
 0077 network-placement candidate through ordinary Make targets:
 
 ~~~sh
-make build/fusion.bpf.o build/bpfusion_load vllm-mixed-kernel-network
-./build/bpfusion_load stream-uring-attach
+make build/server.bpf.o build/bpf_gpu_server_load vllm-mixed-kernel-network
+./build/bpf_gpu_server_load stream-uring-attach
 ./build/vllm_mixed_kernel_network "$model" 120
 ~~~
 
@@ -218,7 +218,7 @@ is reused and there is no GPU networking CTA. This is an explicit experimental
 alternative:0078 finds no throughput advantage over the same-executor native
 path, and0077 records higher CPU than the selected oldloop. Existing target
 names keep their selected semantics. Use a separate BUILD plus matching
-CPPFLAGS=-DBF_LLM_SLOTS=16 only when reproducing the recorded16-slot experiment.
+CPPFLAGS=-DBGS_LLM_SLOTS=16 only when reproducing the recorded16-slot experiment.
 
 ## Correctness and experiment reproduction
 

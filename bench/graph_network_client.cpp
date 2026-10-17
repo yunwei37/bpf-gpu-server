@@ -20,7 +20,7 @@
 #include <sys/timerfd.h>
 #include <time.h>
 #include <unistd.h>
-#include "bpfusion_queue.h"
+#include "bpf_gpu_server_queue.h"
 static_assert(__BYTE_ORDER__==__ORDER_LITTLE_ENDIAN__,"log/wire use little endian");
 struct Pattern { float input[64],expected[64]; };
 #pragma pack(push,1)
@@ -75,7 +75,7 @@ struct Worker {
         return fd;
     }
     sockaddr_in address() {
-        sockaddr_in a{};a.sin_family=AF_INET;a.sin_port=htons(BF_LLM_TCP_PORT);
+        sockaddr_in a{};a.sin_family=AF_INET;a.sin_port=htons(BGS_LLM_TCP_PORT);
         require(inet_pton(AF_INET,host.c_str(),&a.sin_addr)==1,"numeric IPv4 required");return a;
     }
     void finish(unsigned i,unsigned status,unsigned error=0) {
@@ -101,7 +101,7 @@ struct Worker {
         uint64_t now=ns();auto& c=peers[i];c.rec={};c.rec.index=c.index;c.rec.pattern=c.index%16;
         c.rec.scheduled=epoch+offsets[c.index];c.rec.begin=now;c.written=c.received=0;
         if(now>=c.rec.scheduled+30000000000ULL){finish(i,1);return;}
-        c.frame={};c.frame.magic=BF_LLM_MAGIC;c.frame.np=c.frame.ng=64;
+        c.frame={};c.frame.magic=BGS_LLM_MAGIC;c.frame.np=c.frame.ng=64;
         c.frame.scheduled=c.rec.scheduled;
         memcpy(c.frame.input,patterns[c.rec.pattern].input,256);
         if(c.fd<0) {

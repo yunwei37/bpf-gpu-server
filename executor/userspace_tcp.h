@@ -17,7 +17,7 @@ static void user_network_interrupt() {
     if(fd>=0) { uint64_t one=1;ssize_t ignored=write(fd,&one,sizeof(one));(void)ignored; }
 }
 
-static int user_network(bf_page *page,int listener,unsigned seconds,
+static int user_network(bgs_page *page,int listener,unsigned seconds,
                         volatile sig_atomic_t *stopped) {
     struct Peer {
         int fd;
@@ -38,7 +38,7 @@ static int user_network(bf_page *page,int listener,unsigned seconds,
         std::shared_ptr<Peer> peer;
         std::string header;
         size_t header_sent=0,bytes=0;
-    } replies[BF_LLM_SLOTS];
+    } replies[BGS_LLM_SLOTS];
     std::map<int,std::shared_ptr<Peer>> peers;
     unsigned head=0,completed=0,rejected_count=0,accepted=0;
     int ep=epoll_create1(EPOLL_CLOEXEC);
@@ -74,8 +74,8 @@ static int user_network(bf_page *page,int listener,unsigned seconds,
         memcpy(fields,peer->input.data()+offset,16);
         memcpy(&client_ns,peer->input.data()+offset+16,8);
         unsigned prompt=fields[1],gen=fields[2];
-        if(fields[0]!=BF_LLM_MAGIC || !prompt || prompt>BF_LLM_MAX_TOK ||
-           !gen || gen>BF_LLM_MAX_TOK) { disconnect(*peer);return; }
+        if(fields[0]!=BGS_LLM_MAGIC || !prompt || prompt>BGS_LLM_MAX_TOK ||
+           !gen || gen>BGS_LLM_MAX_TOK) { disconnect(*peer);return; }
         size_t bytes=24+prompt*4;
         if(http) {
             size_t key=peer->input.find("\r\nContent-Length: ");
@@ -89,7 +89,7 @@ static int user_network(bf_page *page,int listener,unsigned seconds,
         peer->queued=true;
         if(pending.size()>queued_peak)queued_peak=pending.size();
     };
-    auto send_reply=[&](Peer &peer,Reply &reply,bf_llm_slot *slot,unsigned produced) {
+    auto send_reply=[&](Peer &peer,Reply &reply,bgs_llm_slot *slot,unsigned produced) {
         iovec vec[2];unsigned count=0;
         size_t header_bytes=reply.header.size()-reply.header_sent;
         if(header_bytes) vec[count++]={reply.header.data()+reply.header_sent,header_bytes};
@@ -105,7 +105,7 @@ static int user_network(bf_page *page,int listener,unsigned seconds,
             reply.header_sent+=sent_header;reply.bytes+=(size_t)n-sent_header;
         }
     };
-#ifdef BF_USER_NETWORK_WAIT
+#ifdef BGS_USER_NETWORK_WAIT
     printf("userspace completion wait=epoll_pwait2 active_timeout_ns=60000 idle=socket_or_deadline shutdown=eventfd\n");
 #else
     printf("userspace completion wait=busy epoll_wait timeout_ms=0\n");
@@ -113,8 +113,8 @@ static int user_network(bf_page *page,int listener,unsigned seconds,
     fflush(stdout);
     auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(seconds);
     while(!*stopped && std::chrono::steady_clock::now()<deadline) {
-        epoll_event events[BF_LLM_SLOTS*2];
-#ifdef BF_USER_NETWORK_WAIT
+        epoll_event events[BGS_LLM_SLOTS*2];
+#ifdef BGS_USER_NETWORK_WAIT
         // Socket readiness wakes immediately; GPU completions are polled after
         // the same nominal 60 us lower wait bound used by kernel TX.
         auto remaining=std::chrono::duration_cast<std::chrono::nanoseconds>(
@@ -122,9 +122,9 @@ static int user_network(bf_page *page,int listener,unsigned seconds,
         if(remaining<=0)break;
         long long wait_ns=(head!=completed || !pending.empty()) ? 60000 : remaining;
         const timespec timeout={wait_ns/1000000000,wait_ns%1000000000};
-        int n=epoll_pwait2(ep,events,BF_LLM_SLOTS*2,&timeout,nullptr);
+        int n=epoll_pwait2(ep,events,BGS_LLM_SLOTS*2,&timeout,nullptr);
 #else
-        int n=epoll_wait(ep,events,BF_LLM_SLOTS*2,0);
+        int n=epoll_wait(ep,events,BGS_LLM_SLOTS*2,0);
 #endif
         if(*stopped)break;
         if(n<0 && errno!=EINTR) { perror("epoll wait");break; }
@@ -158,17 +158,17 @@ static int user_network(bf_page *page,int listener,unsigned seconds,
                 enqueue(it->second);
             }
         }
-        for(unsigned i=0;i<BF_LLM_SLOTS;i++) {
+        for(unsigned i=0;i<BGS_LLM_SLOTS;i++) {
             Reply &reply=replies[i];if(!reply.peer) continue;
-            auto peer_ref=reply.peer;Peer &peer=*peer_ref;bf_llm_slot *slot=&page->llm[i];
+            auto peer_ref=reply.peer;Peer &peer=*peer_ref;bgs_llm_slot *slot=&page->llm[i];
             unsigned state=__atomic_load_n(&slot->state,__ATOMIC_ACQUIRE);
             unsigned short flags=__atomic_load_n(&slot->pad,__ATOMIC_ACQUIRE);
-            bool rejected=flags&BF_LLM_REJECTED;
-            if((flags&BF_LLM_VALIDATING) || (rejected && state!=BF_DONE)) continue;
+            bool rejected=flags&BGS_LLM_REJECTED;
+            if((flags&BGS_LLM_VALIDATING) || (rejected && state!=BGS_DONE)) continue;
             unsigned produced=__atomic_load_n(&slot->produced,__ATOMIC_ACQUIRE);
-            if(state!=BF_DONE && produced==slot->n_gen && produced) produced--;
-            if(rejected && (flags&BF_LLM_TRANSPORT_MASK)==1) disconnect(peer);
-            if((flags&BF_LLM_TRANSPORT_MASK)==2 && reply.header.empty()) {
+            if(state!=BGS_DONE && produced==slot->n_gen && produced) produced--;
+            if(rejected && (flags&BGS_LLM_TRANSPORT_MASK)==1) disconnect(peer);
+            if((flags&BGS_LLM_TRANSPORT_MASK)==2 && reply.header.empty()) {
                 reply.header="HTTP/1.1 "+std::string(rejected ? "400 Bad Request" : "200 OK")
                     +"\r\nContent-Type: application/octet-stream\r\nContent-Length: "
                     +std::to_string(rejected ? 0 : slot->n_gen*4)+"\r\n\r\n";
@@ -176,10 +176,10 @@ static int user_network(bf_page *page,int listener,unsigned seconds,
             // Keep default TCP buffering; submit header and first tokens together.
             if(peer.fd>=0 && (produced || rejected))
                 send_reply(peer,reply,slot,produced);
-            if(state==BF_DONE && (peer.fd<0 ||
+            if(state==BGS_DONE && (peer.fd<0 ||
                 (reply.header_sent==reply.header.size() && reply.bytes==produced*4))) {
                 peer.slot=-1;reply={};
-                __atomic_store_n(&slot->state,(unsigned)BF_FREE,__ATOMIC_RELEASE);
+                __atomic_store_n(&slot->state,(unsigned)BGS_FREE,__ATOMIC_RELEASE);
                 __atomic_fetch_and(&page->llm_admission,~(1ULL<<(32+i)),__ATOMIC_RELEASE);
                 completed++;if(rejected) rejected_count++;
                 enqueue(peer_ref);
@@ -195,17 +195,17 @@ static int user_network(bf_page *page,int listener,unsigned seconds,
             auto &request=pending.front();
             auto peer=request.peer;
             if(peer->fd<0) { peer->queued=false;pending.pop_front();continue; }
-            unsigned i=head%BF_LLM_SLOTS;bf_llm_slot *slot=&page->llm[i];
+            unsigned i=head%BGS_LLM_SLOTS;bgs_llm_slot *slot=&page->llm[i];
             if(__atomic_load_n(&page->llm_reserved,__ATOMIC_ACQUIRE)&(1u<<i))break;
             __atomic_fetch_or(&page->llm_admission,1ULL<<(32+i),__ATOMIC_ACQ_REL);
-            __atomic_store_n(&slot->state,(unsigned)BF_WRITING,__ATOMIC_RELEASE);
+            __atomic_store_n(&slot->state,(unsigned)BGS_WRITING,__ATOMIC_RELEASE);
             slot->n_prompt=request.prompt;slot->n_gen=request.gen;slot->produced=0;
             slot->client_ns=request.client_ns;
-            slot->pad=(request.http ? 2 : 1)|BF_LLM_VALIDATING;
+            slot->pad=(request.http ? 2 : 1)|BGS_LLM_VALIDATING;
             memcpy(slot->tok_in,peer->input.data()+request.offset+24,request.prompt*4);
             peer->input.erase(0,request.offset+request.bytes);
             replies[i].peer=peer;peer->slot=i;peer->queued=false;pending.pop_front();
-            __atomic_store_n(&slot->state,(unsigned)BF_PENDING,__ATOMIC_RELEASE);
+            __atomic_store_n(&slot->state,(unsigned)BGS_PENDING,__ATOMIC_RELEASE);
             __atomic_store_n(&page->llm_head,++head,__ATOMIC_RELEASE);
         }
     }

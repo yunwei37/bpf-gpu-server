@@ -1,0 +1,10 @@
+{
+  "exit": 0,
+  "elapsed_s": 16.803419005009346,
+  "command": [
+    "python",
+    "bench/smoke_paper.py",
+    "--output",
+    "../graph-smoke"
+  ]
+}

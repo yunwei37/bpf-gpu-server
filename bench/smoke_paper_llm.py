@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""Optional local Qwen LLM smoke: resident16/kernel16/resident32/official."""
+"""Local pinned-model LLM smoke: resident16/kernel16/resident32/official."""
 import argparse
-import gzip
 import json
 import os
 from pathlib import Path
@@ -17,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--model", type=Path, required=True, help="Downloaded pinned Qwen checkpoint")
+    ap.add_argument("--model", type=Path, required=True, help="Downloaded pinned Qwen2.5-0.5B or SmolLM2-135M checkpoint")
     ap.add_argument("--output", type=Path, required=True, help="New directory outside source tree")
     args = ap.parse_args()
     model, out = args.model.resolve(), args.output.resolve()
@@ -25,17 +24,22 @@ def main():
         ap.error("Need a downloaded model and a new output directory outside source")
     out.mkdir(parents=True, exist_ok=False)
     pins = Path("/sys/fs/bpf")
-    assert not list(pins.glob("bpfusion*")), "Preserve the existing BPF owner"
+    assert not list(pins.glob("bgs_*")), "Preserve the existing BPF owner"
     archive = ROOT / "bench/results/official_sustained_20261016"
-    raw = next((archive / "official_remote_full_retry2").glob("*_native_r192.client.jsonl.gz"))
-    with gzip.open(raw, "rt") as stream:
-        cfg = json.loads(stream.readline())["config"]
+    model_config = json.loads((model / "config.json").read_text())
+    candidates = [json.loads(p.read_text()) for p in
+                  (ROOT / "bench/results/kernel_network_integration_20261017").glob("*_frozen.json")]
+    candidates = [c for c in candidates if Path(c["model"]).name == model.name
+                  and c["frozen_model"]["vocab"] == model_config["vocab_size"]]
+    if len(candidates) != 1:
+        ap.error("Need one of the two pinned snapshots; frozen prompt/output references must match the checkpoint")
+    cfg = candidates[0]
     config = out / "config.json"
     config.write_text(json.dumps(cfg))
     key = out / "private-test-key"
     key.write_text(secrets.token_urlsafe(24))
     key.chmod(0o600)
-    env = dict(os.environ, BF_BIND="127.0.0.1", PYTHONPATH=str(ROOT / "executor"),
+    env = dict(os.environ, BGS_BIND="127.0.0.1", PYTHONPATH=str(ROOT / "executor"),
                PYTHONUNBUFFERED="1", VLLM_ENABLE_V1_MULTIPROCESSING="0",
                TORCH_EXTENSIONS_DIR=str(out / "extensions"), VLLM_CACHE_ROOT=str(out / "vllm-cache"),
                VLLM_API_KEY=key.read_text())
@@ -43,8 +47,8 @@ def main():
     try:
         for slots in [16, 32]:
             build = out / ("build%d" % slots)
-            cmd = ["make", "BUILD=" + str(build), "CPPFLAGS=-DBF_LLM_SLOTS=%d" % slots,
-                   "VLLM_PYTHON=" + sys.executable, str(build / "fusion.bpf.o"), str(build / "bpfusion_load"),
+            cmd = ["make", "BUILD=" + str(build), "CPPFLAGS=-DBGS_LLM_SLOTS=%d" % slots,
+                   "VLLM_PYTHON=" + sys.executable, str(build / "server.bpf.o"), str(build / "bpf_gpu_server_load"),
                    "vllm-mixed-user-network-wait"]
             if slots == 16:
                 cmd.append("vllm-mixed-kernel-network")
@@ -59,7 +63,7 @@ def main():
             try:
                 if mode == "kernel":
                     attached = True
-                    z = subprocess.run([str(build / "bpfusion_load"), "stream-uring-attach"], cwd=ROOT, env=env,
+                    z = subprocess.run([str(build / "bpf_gpu_server_load"), "stream-uring-attach"], cwd=ROOT, env=env,
                                        capture_output=True, text=True)
                     (out / (tag + ".attach.txt")).write_text(z.stdout + z.stderr)
                     z.check_returncode()
@@ -110,12 +114,12 @@ def main():
                     server.send_signal(signal.SIGINT)
                     server.wait(timeout=90)
                 if attached:
-                    z = subprocess.run([str(build / "bpfusion_load"), "stream-detach"], cwd=ROOT, env=env,
+                    z = subprocess.run([str(build / "bpf_gpu_server_load"), "stream-detach"], cwd=ROOT, env=env,
                                        capture_output=True, text=True)
                     (out / (tag + ".detach.txt")).write_text(z.stdout + z.stderr)
-                    for name in ["bpfusion_ctl", "bpfusion_stats", "bpfusion_db"]:
+                    for name in ["bgs_ctl", "bgs_stats", "bgs_db"]:
                         (pins / name).unlink(missing_ok=True)
-                    assert z.returncode == 0 and not list(pins.glob("bpfusion*"))
+                    assert z.returncode == 0 and not list(pins.glob("bgs_*"))
                 receipts.append(receipt)
                 (out / "smoke.json").write_text(json.dumps(receipts, indent=2))
     finally:

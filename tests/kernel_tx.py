@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """Live kernel-TX protocol regression: no model inference, synthetic token IDs.
 Run from the root after make probes tools and make -C module CC=gcc-15.
-Owns only this namespace's BPFusion tc hook and test module for the run.
+Owns only this namespace's bpf-gpu-server tc hook and test module for the run.
 """
 import ctypes
 import errno
@@ -10,8 +10,8 @@ import socket
 import struct
 import subprocess
 import time
-from llm_executor import (open_page, Page, LLM_HEAD_OFF, BF_LLM_SLOTS,
-                          LLM_RING_OFF, LLM_SLOT_SIZE, BF_PENDING, BF_FREE)
+from llm_executor import (open_page, Page, LLM_HEAD_OFF, BGS_LLM_SLOTS,
+                          LLM_RING_OFF, LLM_SLOT_SIZE, BGS_PENDING, BGS_FREE)
 
 
 def wait_for(fn):
@@ -25,8 +25,8 @@ def wait_for(fn):
 
 
 def main():
-    subprocess.run(["./build/bpfusion_load", "detach", "lo"], check=True)
-    subprocess.run(["./build/bpfusion_load", "attach", "lo"], check=True)
+    subprocess.run(["./build/bpf_gpu_server_load", "detach", "lo"], check=True)
+    subprocess.run(["./build/bpf_gpu_server_load", "attach", "lo"], check=True)
     loaded = False
     listener = socket.socket()
     listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -39,20 +39,20 @@ def main():
         # Reject a genuine but incompatible BPF map FD before array casting.
         lib = ctypes.CDLL(None, use_errno=True)
         libbpf = ctypes.CDLL("libbpf.so.1", use_errno=True)
-        wrong = libbpf.bpf_obj_get(b"/sys/fs/bpf/bpfusion_stats")
+        wrong = libbpf.bpf_obj_get(b"/sys/fs/bpf/bgs_stats")
         assert wrong >= 0
-        with open("module/bfusion_tx.ko", "rb") as module:
+        with open("module/bpf_gpu_server_tx.ko", "rb") as module:
             ret = lib.syscall(313, module.fileno(), f"map_fd={wrong}".encode(), 0)
             assert ret == -1 and ctypes.get_errno() == errno.EINVAL
         import os
         os.close(wrong)
         print("PASS wrong map rejected", flush=True)
-        subprocess.run(["./build/bpfusion_load", "tx-load"], check=True)
+        subprocess.run(["./build/bpf_gpu_server_load", "tx-load"], check=True)
         loaded = True
         for trial in range(26):
             head = page.u32(LLM_HEAD_OFF)
-            idx = head % BF_LLM_SLOTS
-            assert page.slot(idx)[0] == BF_FREE
+            idx = head % BGS_LLM_SLOTS
+            assert page.slot(idx)[0] == BGS_FREE
             client = socket.create_connection(("127.0.0.1", 39403), timeout=5)
             server, _ = listener.accept()
             n = 1 if trial == 0 else 64
@@ -69,7 +69,7 @@ def main():
                 page.set_tok_out(idx, k, trial * 1000 + k)
                 page.set_produced(idx, k + 1)
             time.sleep(0.08) # exceeds the former 500 * 60 us reclaim interval
-            assert page.slot(idx)[0] == BF_PENDING, "reclaimed while executor owned slot"
+            assert page.slot(idx)[0] == BGS_PENDING, "reclaimed while executor owned slot"
             data = b""
             if not disconnected:
                 # The existing TX contract retains the final token until DONE.
@@ -78,7 +78,7 @@ def main():
                     assert chunk
                     data += chunk
                 assert data == expected[:-4]
-                assert page.slot(idx)[0] == BF_PENDING
+                assert page.slot(idx)[0] == BGS_PENDING
             page.finish(idx)
             if not disconnected:
                 while len(data) < len(expected):
@@ -87,7 +87,7 @@ def main():
                     assert chunk
                     data += chunk
                 assert data == expected
-            wait_for(lambda: page.slot(idx)[0] == BF_FREE)
+            wait_for(lambda: page.slot(idx)[0] == BGS_FREE)
             if not disconnected:
                 client.close()
             server.close()
@@ -96,15 +96,15 @@ def main():
         try:
             if loaded:
                 ctypes.set_errno(0)
-                ret = lib.syscall(176, ctypes.c_char_p(b"bfusion_tx"), 0)
+                ret = lib.syscall(176, ctypes.c_char_p(b"bpf_gpu_server_tx"), 0)
                 if ret != 0:
                     raise OSError(ctypes.get_errno(), "delete_module")
         finally:
             listener.close()
             mm.close()
-            subprocess.run(["./build/bpfusion_load", "detach", "lo"], check=True)
+            subprocess.run(["./build/bpf_gpu_server_load", "detach", "lo"], check=True)
             import pathlib
-            for name in ("bpfusion_stats", "bpfusion_db", "bpfusion_ctl"):
+            for name in ("bgs_stats", "bgs_db", "bgs_ctl"):
                 pathlib.Path("/sys/fs/bpf", name).unlink(missing_ok=True)
 
 

@@ -12,10 +12,10 @@ extern "C" {
 // output_words. No tokenizer, vocabulary, model metadata or math kernel is used.
 // The transport currently limits both counts to max_words(), and preserves its
 // FIFO slot retirement and TCP/HTTP framing. It is not an autoregressive API.
-unsigned bf_graph_abi_version(void);
-unsigned bf_graph_max_slots(void);
-unsigned bf_graph_max_words(void);
-int bf_graph_serve(const uint64_t *graphs, const uint64_t *inputs,
+unsigned bgs_graph_abi_version(void);
+unsigned bgs_graph_max_slots(void);
+unsigned bgs_graph_max_words(void);
+int bgs_graph_serve(const uint64_t *graphs, const uint64_t *inputs,
                    const uint64_t *outputs, unsigned input_words,
                    unsigned output_words, unsigned seconds);
 #ifdef __cplusplus

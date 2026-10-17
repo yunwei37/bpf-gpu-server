@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// BPFusion: resident daemon = GPU executor + packet gateway.
+// bpf-gpu-server: resident daemon = GPU executor + packet gateway.
 //
 // One process, two threads, one shared page:
 //
@@ -38,7 +38,7 @@
 #include <ctime>
 
 #include "cuda_timer.h"
-#include "bpfusion_queue.h"
+#include "bpf_gpu_server_queue.h"
 
 // One request: `work` passes of a 16x16x16 triple with a leaky-ReLU, so the
 // measured latency is arithmetic rather than pure launch overhead.
@@ -50,7 +50,7 @@
 // index of the first slot in this batch, and `offset` converts the GPU
 // %globaltimer into CLOCK_MONOTONIC on the GPU side so the host never has to
 // rewrite the timestamps.
-__global__ void bf_exec_kernel(struct bf_page *p, unsigned int work,
+__global__ void bgs_exec_kernel(struct bgs_page *p, unsigned int work,
 			       long long offset)
 {
 	__shared__ float w1[16][16], w2[16][16], w3[16][16];
@@ -72,8 +72,8 @@ __global__ void bf_exec_kernel(struct bf_page *p, unsigned int work,
 	 * notify). Spin costs GPU issue slots (<=1 SM) and no host CPU. */
 	for (;;) {
 		__u32 idx;
-		struct bf_done_slot *out;
-		struct bf_ctl_slot *in;
+		struct bgs_done_slot *out;
+		struct bgs_ctl_slot *in;
 		unsigned long long t_start, t_done;
 		float a[16], b[16];
 		/* Diagnostic: count spins in the unused pad0 word so a host
@@ -86,25 +86,25 @@ __global__ void bf_exec_kernel(struct bf_page *p, unsigned int work,
 		 * spin on stale zeros forever. __ldcg reads at gpu scope
 		 * (bypassing L1); the matching writes use __stcg. */
 		if (__ldcg((const unsigned long long *)&p->stop_ns) &&
-		    (unsigned long long)((long long)bf_globaltimer() + offset) >=
+		    (unsigned long long)((long long)bgs_globaltimer() + offset) >=
 			    __ldcg((const unsigned long long *)&p->stop_ns))
 			return;
 		if (__ldcg((const unsigned int *)&p->done_seq) >=
 		    __ldcg((const unsigned int *)&p->head))
 			continue;
-		idx = __ldcg((const unsigned int *)&p->done_seq) % BF_SLOTS;
+		idx = __ldcg((const unsigned int *)&p->done_seq) % BGS_SLOTS;
 		in = &p->slots[idx];
 		out = &p->done[idx];
-		/* `BF_PENDING` in the ctl slot means the BPF producer has
-		 * published; `BF_FREE` in the done slot means the responder
+		/* `BGS_PENDING` in the ctl slot means the BPF producer has
+		 * published; `BGS_FREE` in the done slot means the responder
 		 * has finished with a previous round and recycled it, so the
 		 * GPU may overwrite it without racing the reader. */
-		if (__ldcg((const unsigned int *)&in->state) != BF_PENDING ||
-		    __ldcg((const unsigned int *)&out->state) != BF_FREE)
+		if (__ldcg((const unsigned int *)&in->state) != BGS_PENDING ||
+		    __ldcg((const unsigned int *)&out->state) != BGS_FREE)
 			continue;
 		if (t == 0)
-			t_start = bf_globaltimer();
-		for (int i = 0; i < BF_VEC; i++)
+			t_start = bgs_globaltimer();
+		for (int i = 0; i < BGS_VEC; i++)
 			a[i] = __ldcg((const float *)&in->x[i]);
 		for (unsigned int w = 0; w < work; w++) {
 			for (int o = 0; o < 16; o++) {
@@ -132,21 +132,21 @@ __global__ void bf_exec_kernel(struct bf_page *p, unsigned int work,
 				a[i] = b[i];
 		}
 		if (t == 0) {
-			t_done = bf_globaltimer();
+			t_done = bgs_globaltimer();
 			out->id = __ldcg((const unsigned int *)&in->id);
 			out->client_ns =
 				__ldcg((const unsigned long long *)&in->client_ns);
 			out->ingress_ns =
 				__ldcg((const unsigned long long *)&in->ingress_ns);
-			for (int i = 0; i < BF_VEC; i++)
+			for (int i = 0; i < BGS_VEC; i++)
 				out->y[i] = a[i];
 			out->gpu_start_ns =
 				(unsigned long long)((long long)t_start + offset);
 			out->gpu_done_ns =
 				(unsigned long long)((long long)t_done + offset);
 			__threadfence_system();
-			__stcg((unsigned int *)&out->state, BF_DONE);
-			__stcg((unsigned int *)&in->state, BF_FREE);
+			__stcg((unsigned int *)&out->state, BGS_DONE);
+			__stcg((unsigned int *)&in->state, BGS_FREE);
 			__stcg((unsigned int *)&p->served,
 			       __ldcg((const unsigned int *)&p->served) + 1);
 			__stcg((unsigned int *)&p->done_seq,
@@ -156,7 +156,7 @@ __global__ void bf_exec_kernel(struct bf_page *p, unsigned int work,
 }
 
 struct daemon {
-	struct bf_page *page;
+	struct bgs_page *page;
 	int sock;
 	long pg;
 	int run_seconds;
@@ -227,7 +227,7 @@ static void *responder(void *arg)
 	uint32_t published, seen;
 
 	pin_cpu(d->cpu_responder);
-	while (bf_host_mono_ns() < d->deadline) {
+	while (bgs_host_mono_ns() < d->deadline) {
 		char buf[2048];
 		ssize_t r = recv(d->sock, buf, sizeof(buf), MSG_DONTWAIT);
 
@@ -261,18 +261,18 @@ static void *responder(void *arg)
 		}
 		while (d->page->acked <
 		       __atomic_load_n(&d->page->done_seq, __ATOMIC_ACQUIRE)) {
-			uint32_t idx = d->page->acked % BF_SLOTS;
-			struct bf_done_slot *ds = &d->page->done[idx];
-			struct bf_resp_hdr resp;
+			uint32_t idx = d->page->acked % BGS_SLOTS;
+			struct bgs_done_slot *ds = &d->page->done[idx];
+			struct bgs_resp_hdr resp;
 			struct sockaddr_in to;
 			uint64_t t0;
 
 			if (__atomic_load_n(&ds->state, __ATOMIC_ACQUIRE) !=
-				    BF_DONE ||
+				    BGS_DONE ||
 			    ds->id != d->page->acked)
 				break;
 			memset(&resp, 0, sizeof(resp));
-			resp.magic = BF_MAGIC;
+			resp.magic = BGS_MAGIC;
 			resp.id = ds->id;
 			resp.client_ns = ds->client_ns;
 			resp.ingress_ns = ds->ingress_ns;
@@ -283,18 +283,18 @@ static void *responder(void *arg)
 			to.sin_family = AF_INET;
 			to.sin_addr.s_addr = d->page->peers[idx].addr_be;
 			to.sin_port = d->page->peers[idx].port_be;
-			t0 = bf_host_mono_ns();
+			t0 = bgs_host_mono_ns();
 			if (sendto(d->sock, &resp, sizeof(resp), 0,
 				   (struct sockaddr *)&to, sizeof(to)) < 0)
 				d->r_errors++;
 			if (d->ne < d->ne_max)
-				d->lat_egress[d->ne++] = bf_host_mono_ns() - t0;
+				d->lat_egress[d->ne++] = bgs_host_mono_ns() - t0;
 			/* Recycle: only now may the producer reuse the slot.
 			 * The ctl slot must be freed here too, since the GPU
 			 * only frees its staged copy, not the mmap'ed page. */
-			__atomic_store_n(&d->page->slots[idx].state, BF_FREE,
+			__atomic_store_n(&d->page->slots[idx].state, BGS_FREE,
 					 __ATOMIC_RELEASE);
-			__atomic_store_n(&ds->state, BF_FREE, __ATOMIC_RELEASE);
+			__atomic_store_n(&ds->state, BGS_FREE, __ATOMIC_RELEASE);
 			d->page->acked++;
 			d->served++;
 		}
@@ -346,7 +346,7 @@ int main(int argc, char **argv)
 
 	d.run_seconds = argc > 1 ? atoi(argv[1]) : 5;
 	d.work = argc > 2 ? atoi(argv[2]) : 4;
-	d.batch = argc > 3 ? atoi(argv[3]) : BF_MAX_BATCH;
+	d.batch = argc > 3 ? atoi(argv[3]) : BGS_MAX_BATCH;
 	if (argc > 4)
 		cpu_gpu = atoi(argv[4]);
 	if (argc > 5)
@@ -374,11 +374,11 @@ int main(int argc, char **argv)
 
 	/* The loader owns the object lifetime and pins the maps; the daemon
 	 * only opens them, so both processes share one page and one program. */
-	if ((ctl_fd = bpf_obj_get("/sys/fs/bpf/bpfusion_ctl")) < 0) {
+	if ((ctl_fd = bpf_obj_get("/sys/fs/bpf/bgs_ctl")) < 0) {
 		fprintf(stderr, "bpf_obj_get ctl: %s\n", strerror(errno));
 		return 1;
 	}
-	d.page = (struct bf_page *)mmap(NULL, BF_PAGE_MMAP_BYTES,
+	d.page = (struct bgs_page *)mmap(NULL, BGS_PAGE_MMAP_BYTES,
 					PROT_READ | PROT_WRITE, MAP_SHARED,
 					ctl_fd, 0);
 	if (d.page == MAP_FAILED) {
@@ -386,7 +386,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 	{
-		int db_fd = bpf_obj_get("/sys/fs/bpf/bpfusion_db");
+		int db_fd = bpf_obj_get("/sys/fs/bpf/bgs_db");
 
 		if (db_fd < 0) {
 			fprintf(stderr, "bpf_obj_get doorbell: %s\n",
@@ -400,10 +400,10 @@ int main(int argc, char **argv)
 	memset(&addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
 	{
-		/* Bind loopback by default; BF_BIND lets the responder live on
+		/* Bind loopback by default; BGS_BIND lets the responder live on
 		 * a veth/NIC so the reply leaves via the same device the tc
 		 * ingress hook watches. */
-		const char *ba = getenv("BF_BIND");
+		const char *ba = getenv("BGS_BIND");
 
 		addr.sin_addr.s_addr = ba ? inet_addr(ba)
 					  : htonl(INADDR_LOOPBACK);
@@ -422,10 +422,10 @@ int main(int argc, char **argv)
 	/* --- GPU side ------------------------------------------------------ */
 	{
 		cudaStream_t stream;
-		struct bf_page *d_page;   /* device alias of the BPF control page */
+		struct bgs_page *d_page;   /* device alias of the BPF control page */
 		volatile uint64_t *ts_slot;
 		void *d_ts;
-		bf_timer_sync tinfo;
+		bgs_timer_sync tinfo;
 		__u32 consumed = 0;
 		uint64_t *lat_dev, *lat_kernel;
 		int nb = 0, nk = 0;
@@ -439,10 +439,10 @@ int main(int argc, char **argv)
 		/* Publish the BPF page to the device: cudaHostRegisterMapped
 		 * pins it and cudaHostGetDevicePointer returns a pointer that
 		 * aliases the *same* physical pages the eBPF program wrote, so
-		 * bf_exec_kernel reads `slots[]` and writes `done[]` in place.
+		 * bgs_exec_kernel reads `slots[]` and writes `done[]` in place.
 		 * No per-batch staging copy. */
 		{
-			cudaError_t rc = cudaHostRegister(d.page, BF_PAGE_MMAP_BYTES,
+			cudaError_t rc = cudaHostRegister(d.page, BGS_PAGE_MMAP_BYTES,
 						  cudaHostRegisterMapped);
 
 			if (rc != cudaSuccess) {
@@ -463,8 +463,8 @@ int main(int argc, char **argv)
 		}
 		cudaHostAlloc((void **)&ts_slot, 8, cudaHostAllocMapped);
 		cudaHostGetDevicePointer(&d_ts, (void *)ts_slot, 0);
-		tinfo = bf_timer_sync_sample(ts_slot, d_ts, stream, 64);
-		rb = ring_buffer__new(bpf_obj_get("/sys/fs/bpf/bpfusion_db"),
+		tinfo = bgs_timer_sync_sample(ts_slot, d_ts, stream, 64);
+		rb = ring_buffer__new(bpf_obj_get("/sys/fs/bpf/bgs_db"),
 				      rb_sample, NULL, NULL);
 		if (!rb) {
 			fprintf(stderr, "ring_buffer__new failed\n");
@@ -472,18 +472,18 @@ int main(int argc, char **argv)
 		}
 		printf("daemon: resident kernel, slots=%d work=%d "
 		       "gpu_cpu=%d resp_cpu=%d idle=%d (batch=%d ignored)\n",
-		       BF_SLOTS, d.work, cpu_gpu, cpu_responder,
+		       BGS_SLOTS, d.work, cpu_gpu, cpu_responder,
 		       idle_mode, d.batch);
 		printf("daemon: globaltimer offset=%lld ns (spread %lld ns)\n",
 		       (long long)tinfo.offset, (long long)tinfo.spread);
 
-		d.deadline = bf_host_mono_ns() +
+		d.deadline = bgs_host_mono_ns() +
 			     (uint64_t)d.run_seconds * 1000000000ull;
 		__atomic_store_n(&d.page->ready, 1, __ATOMIC_RELEASE);
 		pthread_create(&th, NULL, responder, &d);
 		pin_cpu(cpu_gpu);
 
-		uint64_t t_run0 = bf_host_mono_ns();
+		uint64_t t_run0 = bgs_host_mono_ns();
 
 		/* Launch **once**: a single resident kernel spins on the
 		 * mmap'ed page for the whole run. There is no per-request
@@ -492,11 +492,11 @@ int main(int argc, char **argv)
 		 * the latency histograms, and (c) sets the stop deadline the
 		 * kernel polls. */
 		__atomic_store_n(&d.page->stop_ns, d.deadline, __ATOMIC_RELEASE);
-		bf_exec_kernel<<<1, 32, 0, stream>>>(d_page, d.work,
+		bgs_exec_kernel<<<1, 32, 0, stream>>>(d_page, d.work,
 						     tinfo.offset);
 
 		{
-			uint64_t t_charge = bf_host_mono_ns();
+			uint64_t t_charge = bgs_host_mono_ns();
 
 			for (;;) {
 				__u32 seq, head;
@@ -507,13 +507,13 @@ int main(int argc, char **argv)
 				seq = __atomic_load_n(&d.page->done_seq,
 						      __ATOMIC_ACQUIRE);
 				while (consumed < seq) {
-					__u32 idx = consumed % BF_SLOTS;
-					struct bf_done_slot *ds =
+					__u32 idx = consumed % BGS_SLOTS;
+					struct bgs_done_slot *ds =
 						&d.page->done[idx];
 
 					if (__atomic_load_n(&ds->state,
 							    __ATOMIC_ACQUIRE) ==
-						    BF_DONE) {
+						    BGS_DONE) {
 						if (ds->gpu_done_ns >
 							    ds->gpu_start_ns &&
 						    nb < 4000000)
@@ -539,7 +539,7 @@ int main(int argc, char **argv)
 						 __ATOMIC_RELEASE);
 				ring_buffer__consume(rb);
 
-				now = bf_host_mono_ns();
+				now = bgs_host_mono_ns();
 				if (consumed < head) {
 					d.busy_ns += now - t_charge;
 					d.n_busy++;
@@ -558,7 +558,7 @@ int main(int argc, char **argv)
 		__atomic_store_n(&d.page->stop_ns, 0, __ATOMIC_RELEASE);
 		{
 			uint64_t drain_deadline =
-				bf_host_mono_ns() + 2000000000ull;
+				bgs_host_mono_ns() + 2000000000ull;
 
 			for (;;) {
 				__u32 seq = __atomic_load_n(&d.page->done_seq,
@@ -567,11 +567,11 @@ int main(int argc, char **argv)
 							     __ATOMIC_ACQUIRE);
 
 				if (seq >= head ||
-				    bf_host_mono_ns() > drain_deadline)
+				    bgs_host_mono_ns() > drain_deadline)
 					break;
 			}
 		}
-		__atomic_store_n(&d.page->stop_ns, bf_host_mono_ns(),
+		__atomic_store_n(&d.page->stop_ns, bgs_host_mono_ns(),
 				 __ATOMIC_RELEASE);
 		cudaStreamSynchronize(stream);   /* resident kernel exits */
 		d.deadline = 0; /* let the responder exit immediately */
@@ -581,7 +581,7 @@ int main(int argc, char **argv)
 		served = d.served;
 
 		{
-			double run_ns = (double)(bf_host_mono_ns() - t_run0);
+			double run_ns = (double)(bgs_host_mono_ns() - t_run0);
 
 			printf("daemon: consumed=%u published=%u head=%u "
 			       "drops=%u acked=%u\n",

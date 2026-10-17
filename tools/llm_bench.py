@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-# BPFusion: LLM-path benchmark.
+# bpf-gpu-server: LLM-path benchmark.
 #
 # Two matched paths, same model, same host, same process count:
 #   A. direct   : tokenize -> model.generate() in-process (vLLM-style baseline)
-#   B. bpfusion : packet -> tc ingress eBPF -> pinned page -> resident executor
+#   B. bpf-gpu-server : packet -> tc ingress eBPF -> pinned page -> resident executor
 #                 -> generated tokens streamed back through the same page
 #
 # Reports TTFT (send -> first token visible) and TPOT (mean inter-token gap).
@@ -12,11 +12,11 @@ import argparse, struct, socket, time
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from llm_executor import (BF_LLM_SLOTS, LLM_HEAD_OFF, open_page, Page,
-                          BF_PENDING)
+from llm_executor import (BGS_LLM_SLOTS, LLM_HEAD_OFF, open_page, Page,
+                          BGS_PENDING)
 
-BF_LLM_PORT = 39402
-BF_LLM_MAGIC = 0x514c4d51
+BGS_LLM_PORT = 39402
+BGS_LLM_MAGIC = 0x514c4d51
 
 
 def direct(model, tok, prompt, n_gen):
@@ -40,10 +40,10 @@ def direct(model, tok, prompt, n_gen):
     return ttft, tpot, tok.decode([nxt])
 
 
-def bpfusion(page, s, dest, ids, n_gen):
+def bgs(page, s, dest, ids, n_gen):
     n_prompt = len(ids)
     client_ns = time.monotonic_ns()
-    hdr = struct.pack("<IIIIQ", BF_LLM_MAGIC, n_prompt, n_gen, 0, client_ns)
+    hdr = struct.pack("<IIIIQ", BGS_LLM_MAGIC, n_prompt, n_gen, 0, client_ns)
     payload = hdr + struct.pack(f"<{n_prompt}I", *ids)
     t_send = time.perf_counter()
     s.sendto(payload, dest)
@@ -52,10 +52,10 @@ def bpfusion(page, s, dest, ids, n_gen):
     deadline = t_send + 30
     while time.perf_counter() < deadline:
         head = page.u32(LLM_HEAD_OFF)
-        for k in range(BF_LLM_SLOTS):
-            idx = (head - 1 - k) % BF_LLM_SLOTS
+        for k in range(BGS_LLM_SLOTS):
+            idx = (head - 1 - k) % BGS_LLM_SLOTS
             v = page.slot(idx)
-            if v[7] == client_ns and v[0] == BF_PENDING:
+            if v[7] == client_ns and v[0] == BGS_PENDING:
                 slot = idx
                 break
         if slot is not None:
@@ -81,13 +81,13 @@ def bpfusion(page, s, dest, ids, n_gen):
     return ttft, tpot, page.slot(slot)[11][:n_gen]
 
 
-def bpfusion_tcp(host, port, ids, n_gen):
+def bgs_tcp(host, port, ids, n_gen):
     """Same request over TCP; tokens arrive on the accepted socket."""
     n_prompt = len(ids)
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((host, port))
     s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-    hdr = struct.pack("<IIIIQ", BF_LLM_MAGIC, n_prompt, n_gen, 0,
+    hdr = struct.pack("<IIIIQ", BGS_LLM_MAGIC, n_prompt, n_gen, 0,
                       time.monotonic_ns())
     t_send = time.perf_counter()
     s.sendall(hdr + struct.pack(f"<{n_prompt}I", *ids))
@@ -127,19 +127,19 @@ def main():
     mm, base = open_page()
     page = Page(mm, base)
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    dest = ("127.0.0.1", BF_LLM_PORT)
+    dest = ("127.0.0.1", BGS_LLM_PORT)
 
     # warm both paths
     direct(model, tok, a.prompt, 4)
-    bpfusion(page, s, dest, ids, 4)
+    bgs(page, s, dest, ids, 4)
 
     print(f"prompt={a.prompt!r} prompt_tok={len(ids)} gen={a.gen}")
     routes = [("direct", lambda: direct(model, tok, a.prompt, a.gen)),
-              ("bpfusion", lambda: bpfusion(page, s, dest, ids, a.gen))]
+              ("bpf-gpu-server", lambda: bgs(page, s, dest, ids, a.gen))]
     if a.tcp:
-        bpfusion_tcp("127.0.0.1", 39403, ids, 4)  # warm
-        routes.append(("bpfusion-tcp",
-                       lambda: bpfusion_tcp("127.0.0.1", 39403, ids, a.gen)))
+        bgs_tcp("127.0.0.1", 39403, ids, 4)  # warm
+        routes.append(("bpf-gpu-server-tcp",
+                       lambda: bgs_tcp("127.0.0.1", 39403, ids, a.gen)))
     for name, fn in routes:
         tt, tp = [], []
         for _ in range(a.rounds):

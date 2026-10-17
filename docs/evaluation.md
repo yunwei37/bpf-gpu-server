@@ -136,7 +136,7 @@ unselected candidates. None of those records is deleted by this consolidation.
 - [Finding 0008 — CPU instructions per generated token](findings/0008-instructions-per-token.md)
 - [Finding 0009 — TCP path (stream request in, stream tokens out)](findings/0009-tcp-path.md)
 - [Finding 0010 — matched model-size comparison (0.5B / 1.5B / Qwen3-1.7B)](findings/0010-model-size.md)
-- [Finding 0011 — external HTTP baseline (vLLM) vs the bpfusion paths](findings/0011-http-baseline.md)
+- [Finding 0011 — external HTTP baseline (vLLM) vs the bpf-gpu-server paths](findings/0011-http-baseline.md)
 - [0012: kernel TCP TX correctness control](findings/0012-kernel-tcp-tx.md)
 - [0013: real Qwen in one resident CUDA kernel](findings/0013-resident-qwen.md)
 - [0014: sockmap TCP stream ingress to resident Qwen](findings/0014-sockmap-stream.md)

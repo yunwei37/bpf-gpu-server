@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// BPFusion: host<->device timestamp correlation.
+// bpf-gpu-server: host<->device timestamp correlation.
 //
 // The executor stamps completions with `%globaltimer`. On this host that
 // counter ticks at the same 1 GHz rate as CLOCK_MONOTONIC (measured:
@@ -12,20 +12,20 @@
 // memory-write latency, not by a launch/synchronize round trip. Taking the
 // minimum over trials (the read that was closest to the store) leaves a bias of
 // the same order as one PCIe write, reported back as `spread`.
-#ifndef BPFUSION_CUDA_TIMER_H
-#define BPFUSION_CUDA_TIMER_H
+#ifndef BPF_GPU_SERVER_CUDA_TIMER_H
+#define BPF_GPU_SERVER_CUDA_TIMER_H
 
 #include <cuda_runtime.h>
 #include <cstdint>
 #include <ctime>
 
-struct bf_timer_sync {
+struct bgs_timer_sync {
 	uint64_t offset; /* host_mono_ns - gpu_globaltimer_ns */
 	int64_t spread;  /* max-min over accepted samples, ns */
 	int valid;
 };
 
-__global__ void bf_ping_globaltimer_kernel(unsigned long long *out)
+__global__ void bgs_ping_globaltimer_kernel(unsigned long long *out)
 {
 	unsigned long long t;
 
@@ -37,7 +37,7 @@ __global__ void bf_ping_globaltimer_kernel(unsigned long long *out)
 	}
 }
 
-__device__ __forceinline__ unsigned long long bf_globaltimer(void)
+__device__ __forceinline__ unsigned long long bgs_globaltimer(void)
 {
 	unsigned long long t;
 
@@ -45,7 +45,7 @@ __device__ __forceinline__ unsigned long long bf_globaltimer(void)
 	return t;
 }
 
-static inline uint64_t bf_host_mono_ns(void)
+static inline uint64_t bgs_host_mono_ns(void)
 {
 	struct timespec ts;
 
@@ -56,11 +56,11 @@ static inline uint64_t bf_host_mono_ns(void)
 // `host_slot` must be pinned+mapped (cudaHostAllocMapped) and `dev_slot` its
 // device pointer. `stream` may be any stream. Returns the best offset estimate
 // and the spread of the accepted samples.
-static inline bf_timer_sync bf_timer_sync_sample(volatile uint64_t *host_slot,
+static inline bgs_timer_sync bgs_timer_sync_sample(volatile uint64_t *host_slot,
 						 void *dev_slot,
 						 cudaStream_t stream, int iters)
 {
-	bf_timer_sync r = {0, 0, 0};
+	bgs_timer_sync r = {0, 0, 0};
 	int64_t mn = 0, mx = 0;
 	int accepted = 0;
 
@@ -73,11 +73,11 @@ static inline bf_timer_sync bf_timer_sync_sample(volatile uint64_t *host_slot,
 
 		*host_slot = 0;
 		__sync_synchronize();
-		bf_ping_globaltimer_kernel<<<1, 32, 0, stream>>>(
+		bgs_ping_globaltimer_kernel<<<1, 32, 0, stream>>>(
 			(unsigned long long *)dev_slot);
 		while (*host_slot == 0 && spins < 100000000)
 			spins++;
-		host_now = bf_host_mono_ns();
+		host_now = bgs_host_mono_ns();
 		gpu = *host_slot;
 		if (gpu == 0)
 			continue;
@@ -103,4 +103,4 @@ static inline bf_timer_sync bf_timer_sync_sample(volatile uint64_t *host_slot,
 	return r;
 }
 
-#endif /* BPFUSION_CUDA_TIMER_H */
+#endif /* BPF_GPU_SERVER_CUDA_TIMER_H */

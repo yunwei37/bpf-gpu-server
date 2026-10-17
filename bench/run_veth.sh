@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0
-# BPFusion over a real netdevice (veth pair across two netns) instead of `lo`.
+# bpf-gpu-server over a real netdevice (veth pair across two netns) instead of `lo`.
 #
 # The two netns force every datagram through the veth driver + the tc/clsact
 # ingress hook on bfv1 — the same hook a NIC's RX path would hit. It is still a
@@ -31,19 +31,19 @@ ip -n $B addr add $BIP/24 dev bfv1; ip -n $B link set bfv1 up; ip -n $B link set
 
 ip netns exec $B bash -c '
   mount -t bpf bpf /sys/fs/bpf 2>/dev/null || true
-  ./build/bpfusion_load attach bfv1 >/dev/null
-  BF_BIND='"$BIP"' ./build/executor '"$SECS"' 4 8 6 7 0 >/tmp/bpfusion_veth_exec.log 2>&1 &
+  ./build/bpf_gpu_server_load attach bfv1 >/dev/null
+  BGS_BIND='"$BIP"' ./build/executor '"$SECS"' 4 8 6 7 0 >/tmp/bgs_veth_exec.log 2>&1 &
   sleep 3
   {
-    echo "=== BPFusion over veth ($A -> $B via bfv1 tc ingress), $(date -u +%Y-%m-%dT%H:%M:%SZ) ==="
-    ip netns exec '"$A"' env BF_DEST='"$BIP"' ./build/client verify 0 0 39400 4
-    ip netns exec '"$A"' env BF_DEST='"$BIP"' ./build/client own 2000 0 39400 4
-    ip netns exec '"$A"' env BF_DEST='"$BIP"' ./build/client burst 400 8 39400 4
+    echo "=== bpf-gpu-server over veth ($A -> $B via bfv1 tc ingress), $(date -u +%Y-%m-%dT%H:%M:%SZ) ==="
+    ip netns exec '"$A"' env BGS_DEST='"$BIP"' ./build/client verify 0 0 39400 4
+    ip netns exec '"$A"' env BGS_DEST='"$BIP"' ./build/client own 2000 0 39400 4
+    ip netns exec '"$A"' env BGS_DEST='"$BIP"' ./build/client burst 400 8 39400 4
     echo
-    ./build/bpfusion_load stats
+    ./build/bpf_gpu_server_load stats
     echo
     echo "=== executor ==="
-    cat /tmp/bpfusion_veth_exec.log
+    cat /tmp/bgs_veth_exec.log
   }
 ' | tee "$OUT"
 

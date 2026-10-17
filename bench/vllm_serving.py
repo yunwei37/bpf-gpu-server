@@ -58,7 +58,7 @@ def main():
              scope=asset["scope"])
     emit("metadata",model=args.model,vocab=config.vocab_size,prompts=prompts,precision="fp16",
          modes=modes,matrix=matrix,repetitions=repetitions,requests_per_cell=requests_per_cell,warmups_per_executor=8,
-         correctness=args.correctness,preflight=args.preflight,untraced=args.untraced,comparison="kernel-loop-progress" if args.loop_progress_comparison else "kernel-loop" if args.loop_comparison else "stock-copy" if args.copy_comparison else "stock-transport" if args.transport_comparison else "dispatch" if args.dispatch_comparison else "release" if args.release_comparison else ("packing" if args.packing_comparison else "transport"),trace_condition="ordinary paths untraced; fixed complete-output-set fidelity" if args.untraced else "both transports identically BF_TRACE",
+         correctness=args.correctness,preflight=args.preflight,untraced=args.untraced,comparison="kernel-loop-progress" if args.loop_progress_comparison else "kernel-loop" if args.loop_comparison else "stock-copy" if args.copy_comparison else "stock-transport" if args.transport_comparison else "dispatch" if args.dispatch_comparison else "release" if args.release_comparison else ("packing" if args.packing_comparison else "transport"),trace_condition="ordinary paths untraced; fixed complete-output-set fidelity" if args.untraced else "both transports identically BGS_TRACE",
          commit=subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip(),
          driver_source=Path(__file__).read_text(),client_source=(root/"bench/resident_dispatch.py").read_text(),
          backend_source=(root/"executor/vllm_graph.py").read_text(),native_source=(root/"executor/vllm_graph.cu").read_text(),
@@ -79,8 +79,8 @@ def main():
             if args.transport_comparison or args.copy_comparison or args.loop_comparison or args.loop_progress_comparison:order=tuple(permutations(modes))[pair%6]
             for mode in (order if args.transport_comparison or args.copy_comparison or args.loop_comparison or args.loop_progress_comparison or pair%2==0 else order[::-1]):
                 kernel_mode=mode.endswith("kernel") or mode.startswith("uring")
-                assert not Path("/sys/module/bfusion_tx").exists()
-                assert not Path("/sys/fs/bpf/bpfusion_ctl").exists()
+                assert not Path("/sys/module/bpf_gpu_server_tx").exists()
+                assert not Path("/sys/fs/bpf/bgs_ctl").exists()
                 p=None;attached=False;rows=[];success=False
                 prefix=output.with_suffix("").with_name(output.stem+f"_p{pair}_{mode}")
                 trace=Path(str(prefix)+".gpu.jsonl");logpath=Path(str(prefix)+".stdout.txt")
@@ -95,7 +95,7 @@ def main():
                 if args.correctness:command=["strace","-D","-f","-e","trace=network,write,io_uring_enter","-o",str(nettrace),*command]
                 try:
                     if kernel_mode:
-                        r=subprocess.run(["./build/bpfusion_load","stream-uring-attach" if mode.startswith("uring") else "stream-attach"],capture_output=True,text=True)
+                        r=subprocess.run(["./build/bpf_gpu_server_load","stream-uring-attach" if mode.startswith("uring") else "stream-attach"],capture_output=True,text=True)
                         emit("attach",pair=pair,mode=mode,code=r.returncode,stdout=r.stdout,stderr=r.stderr)
                         assert r.returncode==0;attached=True
                     with logpath.open("w") as log:p=subprocess.Popen(command,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
@@ -295,7 +295,7 @@ def main():
                         assert counters["trace_count"]==len(rows) and counters["trace_overflow"]==max(0,len(rows)-128)
                         emit("uring_verified",pair=pair,mode=mode,counters=counters)
                     if kernel_mode:
-                        r=subprocess.run(["./build/bpfusion_load","stats"],capture_output=True,text=True)
+                        r=subprocess.run(["./build/bpf_gpu_server_load","stats"],capture_output=True,text=True)
                         emit("stats",pair=pair,mode=mode,code=r.returncode,stdout=r.stdout,stderr=r.stderr);assert r.returncode==0
                         if args.untraced or mode.startswith("uring"):
                             assert f"llm_head={len(rows)}\n" in r.stdout and "llm_reserved=0x0" in r.stdout
@@ -305,17 +305,17 @@ def main():
                         native=re.search(r"userspace TCP stopped: accepted=(\d+) published=(\d+) completed=(\d+) rejected=(\d+)",log)
                         assert native and int(native[2])==int(native[3])==len(rows)
                         assert int(native[4])==sum(row["bad"] for row in rows)
-                    assert not Path("/sys/module/bfusion_tx").exists()
+                    assert not Path("/sys/module/bpf_gpu_server_tx").exists()
                     print(f"PASS pair={pair} mode={mode} requests={len(rows)} tokens={checked} batches={batches}",flush=True)
                     success=True
                 finally:
                     if p is not None and p.poll() is None:p.terminate();emit("cleanup_executor",pair=pair,mode=mode,exit_code=p.wait())
                     if attached:
-                        snapshot=subprocess.run(["./build/bpfusion_load","stats"],capture_output=True,text=True)
+                        snapshot=subprocess.run(["./build/bpf_gpu_server_load","stats"],capture_output=True,text=True)
                         emit("cleanup_stats",pair=pair,mode=mode,code=snapshot.returncode,stdout=snapshot.stdout,stderr=snapshot.stderr)
-                        r=subprocess.run(["./build/bpfusion_load","stream-detach"],capture_output=True,text=True)
+                        r=subprocess.run(["./build/bpf_gpu_server_load","stream-detach"],capture_output=True,text=True)
                         emit("detach",pair=pair,mode=mode,code=r.returncode,stdout=r.stdout,stderr=r.stderr)
-                        for name in ("bpfusion_ctl","bpfusion_stats","bpfusion_db"):Path("/sys/fs/bpf",name).unlink(missing_ok=True)
+                        for name in ("bgs_ctl","bgs_stats","bgs_db"):Path("/sys/fs/bpf",name).unlink(missing_ok=True)
                     emit("executor_terminal",pair=pair,mode=mode,success=success)
         exit_code=0
     except BaseException as exc:

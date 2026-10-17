@@ -81,7 +81,7 @@ with matched computation tests the transport-placement question.
 
 ## Framing, queue ownership and publication
 
-The canonical layout is [bpfusion_queue.h](../bpf/include/bpfusion_queue.h).
+The canonical layout is [bpf_gpu_server_queue.h](../bpf/include/bpf_gpu_server_queue.h).
 Binary frames contain a24-byte header followed by32-bit words. Content-Length
 HTTP POST wraps that binary body; responses are binary words/token IDs.
 This is not JSON, text tokenization, TLS or an OpenAI-compatible API.
@@ -158,7 +158,7 @@ kernel alone does not qualify another host. The module-free path depends on
 its io_uring/BPF interfaces; it does not require the legacy TCP module.
 Earlier BPF kernel-socket APIs and their UDP/context restrictions are recorded
 in [0044](findings/0044-uring-bpf-loop.md), with upstream references.
-[module/bfusion_tx.c](../module/bfusion_tx.c) remains a separate legacy control;
+[module/bpf_gpu_server_tx.c](../module/bpf_gpu_server_tx.c) remains a separate legacy control;
 its presence does not describe the new kernel-network path.
 
 ## Resource accounting and limits

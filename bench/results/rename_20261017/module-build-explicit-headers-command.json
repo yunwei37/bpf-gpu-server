@@ -1,0 +1,11 @@
+{
+  "command": [
+    "make",
+    "CC=gcc-15",
+    "KDIR=/usr/src/linux-headers-7.3.0-070300rc3-generic"
+  ],
+  "exit": 2,
+  "elapsed_s": 0.9967789810616523,
+  "loaded": false,
+  "reason": "Existing /lib/modules/running/build link is absent; use already installed matching headers without any host changes."
+}

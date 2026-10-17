@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// BPFusion: minimal ingress probe.
+// bpf-gpu-server: minimal ingress probe.
 //
 // Attached as a classic-style socket filter (SO_ATTACH_BPF) to a UDP socket.
 // For every packet it records

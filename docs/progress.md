@@ -234,3 +234,15 @@ branding, then update active code/build interfaces and document the exact
 old/new mapping. Verify ordinary builds, both model checkpoints and transports,
 real cuBLAS/cuFFT oracles, then replay all paper numbers offline. All work and
 review stay in this thread; no historical negative result is reopened.
+
+## 2026-10-17 15:01 Los Angeles: renamed source build checkpoint
+
+The loader/header/module names and BGS_/bgs_ namespace now match the public
+project. Short BPF names avoid object-name truncation. Ordinary make all plus
+both graph and mixed-vLLM transports builds pass; graph4cells/64exact replies
+pass. The legacy module compiles using existing matching headers/gcc15 after
+retained header-discovery/copied-source failures, without loading it or changing
+the host. The LLM smoke now selects the correct frozen prompts/references for
+either pinned checkpoint using its existing --model argument. Commit this
+source/build checkpoint before model smokes and full offline replay. The README
+records all old/new names and the requirement to rebuild paired components.

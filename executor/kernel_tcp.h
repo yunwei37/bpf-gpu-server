@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Experimental BPF-owned TCP transport. No steady GPU I/O kernel.
-#ifndef BF_KERNEL_TCP_HOST_H
-#define BF_KERNEL_TCP_HOST_H
+#ifndef BGS_KERNEL_TCP_HOST_H
+#define BGS_KERNEL_TCP_HOST_H
 #include <cuda_runtime.h>
 #include <linux/io_uring.h>
 #include <bpf/bpf.h>
@@ -30,13 +30,13 @@ static_assert(MSG_NOSIGNAL==0x4000,"BPF socket flag compatibility");
 struct UringNetwork {
     void *sq=nullptr,*rings=nullptr,*memory=nullptr;
     size_t sq_bytes=0,ring_bytes=0,mem_bytes=0;
-    bf_ktcp_layout layout{};
-    bf_ktcp_shared *report=nullptr;
+    bgs_ktcp_layout layout{};
+    bgs_ktcp_shared *report=nullptr;
     int ringfd=-1;
     bpf_object *loop_object=nullptr;
     bpf_link *loop_link=nullptr;
 };
-static bf_uring_loop_control *io_signal_control=nullptr;
+static bgs_uring_loop_control *io_signal_control=nullptr;
 static volatile sig_atomic_t io_loop_tid=0;
 static size_t io_align(size_t size){return (size+4095)&~size_t(4095);}
 static void *kernel_memory(size_t size) {
@@ -51,7 +51,7 @@ static void uring_interrupt() {
     if(tid && syscall(__NR_gettid)!=tid)
         syscall(__NR_tgkill,getpid(),tid,SIGTERM);
 }
-static int kernel_configure(bpf_object *object,const bf_ktcp_layout &layout) {
+static int kernel_configure(bpf_object *object,const bgs_ktcp_layout &layout) {
     auto *btf=bpf_object__btf(object);
     int section_id=btf__find_by_name_kind(btf,".rodata",BTF_KIND_DATASEC);
     auto *section=section_id>0?btf__type_by_id(btf,section_id):nullptr;
@@ -60,7 +60,7 @@ static int kernel_configure(bpf_object *object,const bf_ktcp_layout &layout) {
     for(unsigned i=0;i<btf_vlen(section);i++) {
         auto *var=btf__type_by_id(btf,vars[i].type);
         const char *name=var?btf__name_by_offset(btf,var->name_off):nullptr;
-        if(!name || strcmp(name,"bf_ktcp_config"))continue;
+        if(!name || strcmp(name,"bgs_ktcp_config"))continue;
         bpf_map *map;
         bpf_object__for_each_map(map,object) {
             if(bpf_map__btf_value_type_id(map)!=(unsigned)section_id)continue;
@@ -80,12 +80,12 @@ static int kernel_attach(UringNetwork *net) {
     registration.region_uptr=(uint64_t)&region;
     if(syscall(__NR_io_uring_register,net->ringfd,IORING_REGISTER_MEM_REGION,
                &registration,1)<0){perror("kernel TCP memory region");return 1;}
-    net->loop_object=bpf_object__open_file(BF_BUILD_DIR "/kernel_tcp.bpf.o",nullptr);
+    net->loop_object=bpf_object__open_file(BGS_BUILD_DIR "/kernel_tcp.bpf.o",nullptr);
     if(!net->loop_object || libbpf_get_error(net->loop_object)) {
         fprintf(stderr,"kernel TCP BPF open failed\n");return 1;
     }
     const char *names[]={"ctl","pending"};
-    const char *paths[]={"/sys/fs/bpf/bpfusion_ctl","/sys/fs/bpf/bpfusion_pending"};
+    const char *paths[]={"/sys/fs/bpf/bgs_ctl","/sys/fs/bpf/bgs_pending"};
     for(unsigned i=0;i<2;i++) {
         int fd=bpf_obj_get(paths[i]);bpf_map_info info{};unsigned bytes=sizeof(info);
         auto *map=bpf_object__find_map_by_name(net->loop_object,names[i]);
@@ -153,25 +153,25 @@ static int uring_drain(UringNetwork *net){
         if(uring_enter_loop(net))return 1;
     return 0;
 }
-static int uring_start(bf_page *page,bf_page *device,int listener,UringNetwork *net){
+static int uring_start(bgs_page *page,bgs_page *device,int listener,UringNetwork *net){
     (void)page;(void)device;
-    int streams=bpf_obj_get("/sys/fs/bpf/bpfusion_streams");
+    int streams=bpf_obj_get("/sys/fs/bpf/bgs_streams");
     bpf_map_info info{};unsigned size=sizeof(info);
     if(streams<0||bpf_obj_get_info_by_fd(streams,&info,&size)){
         if(streams>=0)close(streams);perror("kernel TCP stream map");return 1;
     }
     close(streams);
     unsigned capacity=info.max_entries,entries=1;
-    while(entries<capacity+BF_LLM_SLOTS+2)entries*=2;
+    while(entries<capacity+BGS_LLM_SLOTS+2)entries*=2;
     net->sq_bytes=io_align((size_t)entries*sizeof(io_uring_sqe));
     net->ring_bytes=io_align(4096+(size_t)entries*2*sizeof(io_uring_cqe));
-    bf_ktcp_layout &layout=net->layout;
+    bgs_ktcp_layout &layout=net->layout;
     layout.capacity=capacity;layout.entries=entries;layout.ring_bytes=net->ring_bytes;
-    size_t cursor=(sizeof(bf_ktcp_shared)+63)&~size_t(63);
-    layout.conns=cursor;cursor+=(size_t)capacity*sizeof(bf_ktcp_conn);
+    size_t cursor=(sizeof(bgs_ktcp_shared)+63)&~size_t(63);
+    layout.conns=cursor;cursor+=(size_t)capacity*sizeof(bgs_ktcp_conn);
     cursor=(cursor+63)&~size_t(63);
-    layout.buffers=cursor;cursor+=(size_t)capacity*BF_KTCP_RX_STRIDE;
-    layout.tx=cursor;cursor+=(size_t)BF_LLM_SLOTS*BF_KTCP_TX_STRIDE;
+    layout.buffers=cursor;cursor+=(size_t)capacity*BGS_KTCP_RX_STRIDE;
+    layout.tx=cursor;cursor+=(size_t)BGS_LLM_SLOTS*BGS_KTCP_TX_STRIDE;
     layout.tick=cursor;cursor+=sizeof(__kernel_timespec);
     net->mem_bytes=io_align(cursor);
     if(net->mem_bytes>UINT32_MAX){
@@ -182,18 +182,18 @@ static int uring_start(bf_page *page,bf_page *device,int listener,UringNetwork *
     net->memory=kernel_memory(net->mem_bytes);
     if(!net->sq||!net->rings||!net->memory)return 1;
     layout.user_base=(uint64_t)net->memory;
-    net->report=(bf_ktcp_shared*)net->memory;
+    net->report=(bgs_ktcp_shared*)net->memory;
     auto *s=net->report;s->free=0;s->active=-1;s->accepting=-1;s->timeout_active=1;
-    auto *conns=(bf_ktcp_conn*)((char*)net->memory+layout.conns);
+    auto *conns=(bgs_ktcp_conn*)((char*)net->memory+layout.conns);
     for(unsigned i=0;i<capacity;i++){
         conns[i].fd=-1;conns[i].next=i+1<capacity?(int)i+1:-1;
         conns[i].reply=-1;conns[i].last=-1;
     }
     for(auto &request:s->requests){request.conn=-1;request.next=-1;}
-    int identity=bpf_obj_get("/sys/fs/bpf/bpfusion_uring_owner");unsigned key=0;
+    int identity=bpf_obj_get("/sys/fs/bpf/bgs_uring_owner");unsigned key=0;
     struct stat namespace_info{};
     if(stat("/proc/self/ns/pid",&namespace_info)){perror("kernel TCP PID namespace");return 2;}
-    bf_uring_context owner{(unsigned)getpid(),0,0,
+    bgs_uring_context owner{(unsigned)getpid(),0,0,
                          (unsigned long long)namespace_info.st_dev,
                          (unsigned long long)namespace_info.st_ino};
     if(identity<0||bpf_map_update_elem(identity,&key,&owner,BPF_ANY)){
@@ -242,7 +242,7 @@ static int uring_start(bf_page *page,bf_page *device,int listener,UringNetwork *
     if(kernel_attach(net))return 9;
     printf("network=kernel BPF TCP controller; no GPU I/O CTA\n"
            "NET_READY pid=%d port=%u ring_bound=1 capacity=%u sq=%u cq=%u\n",
-           getpid(),BF_LLM_TCP_PORT,capacity,parameters.sq_entries,parameters.cq_entries);
+           getpid(),BGS_LLM_TCP_PORT,capacity,parameters.sq_entries,parameters.cq_entries);
     fflush(stdout);return 0;
 }
 static int uring_finish(UringNetwork *net){

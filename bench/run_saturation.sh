@@ -17,7 +17,7 @@ STAMP=$(date -u +%Y%m%dT%H%M%SZ)
 LOG="$OUT/saturation_${STAMP}.txt"
 
 {
-	echo "== BPFusion saturation / bubble sweep $STAMP =="
+	echo "== bpf-gpu-server saturation / bubble sweep $STAMP =="
 	echo "host: $(uname -sr)  gpu: $(nvidia-smi --query-gpu=name --format=csv,noheader | head -1)"
 	echo "offered=$RATE req/s for ${RUN_MS} ms at batch=$BATCH, one daemon per work value"
 	echo
@@ -26,8 +26,8 @@ LOG="$OUT/saturation_${STAMP}.txt"
 for W in $WORKS; do
 	pkill -x executor 2>/dev/null
 	sleep 0.4
-	./build/bpfusion_load detach lo >/dev/null 2>&1
-	./build/bpfusion_load attach lo >/dev/null 2>&1
+	./build/bpf_gpu_server_load detach lo >/dev/null 2>&1
+	./build/bpf_gpu_server_load attach lo >/dev/null 2>&1
 	{
 		echo "=== work=$W ==="
 		echo "--- daemon ---"
@@ -45,12 +45,12 @@ but shows service time) ---"
 	wait "$DPID" 2>/dev/null
 	{
 		echo "--- page/BPF counters ---"
-		./build/bpfusion_load stats 2>&1
+		./build/bpf_gpu_server_load stats 2>&1
 		echo
 	} >> "$LOG"
 done
 
 pkill -x executor 2>/dev/null
-./build/bpfusion_load detach lo >> "$LOG" 2>&1
+./build/bpf_gpu_server_load detach lo >> "$LOG" 2>&1
 echo "wrote $LOG"
 cat "$LOG"

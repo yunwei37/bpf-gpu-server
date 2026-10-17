@@ -24,14 +24,14 @@ def main():
         ap.error("--output must be outside the source tree")
     out.mkdir(parents=True, exist_ok=False)
     pins = Path("/sys/fs/bpf")
-    if list(pins.glob("bpfusion*")):
+    if list(pins.glob("bgs_*")):
         raise RuntimeError("An existing transport owns BPF pins; preserve it and stop this smoke")
     build = out / "build"
-    command = ["make", "BUILD=" + str(build), str(build / "fusion.bpf.o"),
-               str(build / "bpfusion_load"), "graph-server-kernel-network", "graph-server-user-network-wait"]
+    command = ["make", "BUILD=" + str(build), str(build / "server.bpf.o"),
+               str(build / "bpf_gpu_server_load"), "graph-server-kernel-network", "graph-server-user-network-wait"]
     with (out / "build.log").open("w") as log:
         subprocess.run(command, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=True)
-    env = dict(os.environ, BF_BIND="127.0.0.1", PYTHONUNBUFFERED="1")
+    env = dict(os.environ, BGS_BIND="127.0.0.1", PYTHONUNBUFFERED="1")
     results = []
     for operation in ["matmul", "fft"]:
         if operation == "matmul":
@@ -49,7 +49,7 @@ def main():
             try:
                 if mode == "kernel":
                     attached = True
-                    result = subprocess.run([str(build / "bpfusion_load"), "stream-uring-attach"], cwd=ROOT, env=env,
+                    result = subprocess.run([str(build / "bpf_gpu_server_load"), "stream-uring-attach"], cwd=ROOT, env=env,
                                             capture_output=True, text=True)
                     (out / (tag + ".attach.txt")).write_text(result.stdout + result.stderr)
                     result.check_returncode()
@@ -93,12 +93,12 @@ def main():
                     proc.send_signal(signal.SIGINT)
                     proc.wait(timeout=60)
                 if attached:
-                    det = subprocess.run([str(build / "bpfusion_load"), "stream-detach"], cwd=ROOT, env=env,
+                    det = subprocess.run([str(build / "bpf_gpu_server_load"), "stream-detach"], cwd=ROOT, env=env,
                                          capture_output=True, text=True)
                     (out / (tag + ".detach.txt")).write_text(det.stdout + det.stderr)
-                    for name in ["bpfusion_ctl", "bpfusion_stats", "bpfusion_db"]:
+                    for name in ["bgs_ctl", "bgs_stats", "bgs_db"]:
                         (pins / name).unlink(missing_ok=True)
-                    assert det.returncode == 0 and not list(pins.glob("bpfusion*"))
+                    assert det.returncode == 0 and not list(pins.glob("bgs_*"))
                 results.append(receipt)
                 (out / "smoke.json").write_text(json.dumps(results, indent=2))
     print(json.dumps(dict(cells=len(results), checked_requests=sum(x["requests"] for x in results), status="PASS")))

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0
-# BPFusion: external HTTP baseline (vLLM OpenAI-compatible server).
+# bpf-gpu-server: external HTTP baseline (vLLM OpenAI-compatible server).
 #
 #   bench/run_http.sh [model] [gen] [rounds] [port]
 #
 # The fair "ordinary serving stack" comparison: a standard OpenAI-compatible
 # HTTP server (vLLM) on the same model, measured by the same TTFT/TPOT
-# definition as the bpfusion clients. Requires vLLM installed in the current
+# definition as the bpf-gpu-server clients. Requires vLLM installed in the current
 # Python environment (`python3 -m vllm.entrypoints.openai.api_server`).
 set -u
 cd "$(dirname "$0")/.."
@@ -24,7 +24,7 @@ pkill -f 'vllm.entrypoints.openai.api_server' 2>/dev/null
 sleep 1
 python3 -m vllm.entrypoints.openai.api_server \
   --model "$MODEL" --dtype float16 --max-model-len 512 \
-  --port "$PORT" > /tmp/bpfusion_http_srv.log 2>&1 &
+  --port "$PORT" > /tmp/bgs_http_srv.log 2>&1 &
 SRV=$!
 for _ in $(seq 1 120); do
   curl -sf "localhost:${PORT}/v1/models" >/dev/null 2>&1 && break
@@ -32,7 +32,7 @@ for _ in $(seq 1 120); do
 done
 
 {
-  echo "== BPFusion HTTP baseline (vLLM) $STAMP =="
+  echo "== bpf-gpu-server HTTP baseline (vLLM) $STAMP =="
   echo "host: $(uname -sr)  $(nproc) cpus"
   echo "gpu: $(nvidia-smi --query-gpu=name,driver_version --format=csv,noheader 2>/dev/null | head -1)"
   echo "model: $MODEL (fp16, max_model_len 512, vLLM default scheduler)"

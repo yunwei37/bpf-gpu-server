@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-# BPFusion: LLM-path client.
+# bpf-gpu-server: LLM-path client.
 #
-# Sends a prompt (token ids) as a UDP datagram to BF_LLM_PORT through the tc
+# Sends a prompt (token ids) as a UDP datagram to BGS_LLM_PORT through the tc
 # ingress hook, then watches the pinned page's LLM ring for the executor's
 # generated tokens. TTFT is measured from sendto to the first token appearing in
 # the page; TPOT is the inter-token gap. Both cross the real kernel->page path.
 import argparse, ctypes, mmap, os, socket, struct, sys, time
 
 from llm_executor import (LLM_RING_OFF, LLM_SLOT_FMT, LLM_SLOT_SIZE,
-                          BF_LLM_SLOTS, LLM_HEAD_OFF, open_page, Page)
+                          BGS_LLM_SLOTS, LLM_HEAD_OFF, open_page, Page)
 
-BF_LLM_PORT = 39402
-BF_LLM_MAGIC = 0x514c4d51
+BGS_LLM_PORT = 39402
+BGS_LLM_MAGIC = 0x514c4d51
 
 
 def main():
@@ -21,7 +21,7 @@ def main():
     ap.add_argument("--prompt", default="The capital of France is")
     ap.add_argument("--gen", type=int, default=32)
     ap.add_argument("--rounds", type=int, default=5)
-    ap.add_argument("--port", type=int, default=BF_LLM_PORT)
+    ap.add_argument("--port", type=int, default=BGS_LLM_PORT)
     a = ap.parse_args()
 
     from transformers import AutoTokenizer
@@ -39,7 +39,7 @@ def main():
     ttfts, tpots = [], []
     for r in range(a.rounds):
         client_ns = time.monotonic_ns()
-        hdr = struct.pack("<IIIIQ", BF_LLM_MAGIC, n_prompt, a.gen, 0, client_ns)
+        hdr = struct.pack("<IIIIQ", BGS_LLM_MAGIC, n_prompt, a.gen, 0, client_ns)
         payload = hdr + struct.pack(f"<{n_prompt}I", *ids)
         t_send = time.perf_counter()
         s.sendto(payload, dest)
@@ -50,8 +50,8 @@ def main():
         slot = None
         while time.perf_counter() < deadline:
             head = page.u32(LLM_HEAD_OFF)
-            for k in range(BF_LLM_SLOTS):
-                idx = (head - 1 - k) % BF_LLM_SLOTS
+            for k in range(BGS_LLM_SLOTS):
+                idx = (head - 1 - k) % BGS_LLM_SLOTS
                 v = page.slot(idx)
                 if v[7] == client_ns:  # client_ns field
                     slot = (idx, v)

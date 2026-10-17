@@ -51,7 +51,7 @@ def main():
    prompt=torch.zeros(limit,dtype=torch.int64,device='cuda')
    error=torch.zeros(1,dtype=torch.int32,device='cuda')
    arguments=(ctypes.c_int64*24)(*(la+[1,0,base._buf_tensor[vm._pos_bid].data_ptr(),base._buf_tensor[vm._token_bid].data_ptr(),la[0],vm._logits_bid,token.data_ptr(),0]))
-   with tempfile.TemporaryDirectory(prefix='bpfusion-amk-cubin-') as temporary:
+   with tempfile.TemporaryDirectory(prefix='bpf-gpu-server-amk-cubin-') as temporary:
     subprocess.run(['/usr/local/cuda/bin/cuobjdump','--extract-elf','all',vm.ext.__file__],cwd=temporary,check=True,stdout=subprocess.DEVNULL)
     cubins=list(pathlib.Path(temporary).glob('*.cubin'));chosen=None
     for cubin in cubins:

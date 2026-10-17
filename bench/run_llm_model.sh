@@ -1,6 +1,6 @@
 #!/bin/bash
 # SPDX-License-Identifier: Apache-2.0
-# BPFusion: matched LLM comparison for an arbitrary model.
+# bpf-gpu-server: matched LLM comparison for an arbitrary model.
 #   bench/run_llm_model.sh <model> <seconds> <gen> <rounds>
 # Same host/process/executor for direct vs UDP vs TCP; only --model changes.
 set -u
@@ -17,12 +17,12 @@ LOG="$OUT/llm_${TAG}_${STAMP}.txt"
 
 pkill -f 'llm_executor.py' 2>/dev/null
 sleep 0.3
-./build/bpfusion_load detach lo >/dev/null 2>&1
-rm -f /sys/fs/bpf/bpfusion_ctl /sys/fs/bpf/bpfusion_stats /sys/fs/bpf/bpfusion_db 2>/dev/null
-./build/bpfusion_load attach lo >/dev/null 2>&1 || { echo "attach failed"; exit 1; }
+./build/bpf_gpu_server_load detach lo >/dev/null 2>&1
+rm -f /sys/fs/bpf/bgs_ctl /sys/fs/bpf/bgs_stats /sys/fs/bpf/bgs_db 2>/dev/null
+./build/bpf_gpu_server_load attach lo >/dev/null 2>&1 || { echo "attach failed"; exit 1; }
 
 {
-	echo "== BPFusion LLM matched run $STAMP =="
+	echo "== bpf-gpu-server LLM matched run $STAMP =="
 	echo "host: $(uname -sr)  $(nproc) cpus"
 	echo "gpu: $(nvidia-smi --query-gpu=name,driver_version --format=csv,noheader 2>/dev/null | head -1)"
 	echo "model: $MODEL (fp16, batch 1, host-Python executor)"
@@ -46,7 +46,7 @@ HOME=/root PYTHONPATH=executor python3 tools/llm_bench.py --tcp --model "$MODEL"
 {
 	echo
 	echo "--- ingress stats ---"
-	./build/bpfusion_load stats 2>&1 | head -11
+	./build/bpf_gpu_server_load stats 2>&1 | head -11
 } >> "$LOG"
 
 kill "$EPID" 2>/dev/null

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-# BPFusion: CPU instructions per generated token on the LLM path.
+# bpf-gpu-server: CPU instructions per generated token on the LLM path.
 #
 # The resident executor's instruction stream is dominated by its poll loop
 # between requests, so an idle-subtracted number is meaningless. Instead drive
@@ -13,10 +13,10 @@
 import argparse, os, socket, struct, threading, time
 from transformers import AutoTokenizer
 
-from llm_executor import BF_LLM_SLOTS, LLM_HEAD_OFF, open_page, Page
+from llm_executor import BGS_LLM_SLOTS, LLM_HEAD_OFF, open_page, Page
 
-BF_LLM_PORT = 39402
-BF_LLM_MAGIC = 0x514c4d51
+BGS_LLM_PORT = 39402
+BGS_LLM_MAGIC = 0x514c4d51
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PERFCOUNT = os.path.join(ROOT, "build", "perfcount")
 
@@ -30,14 +30,14 @@ def one_request(page, ids, n_gen, dest, counter):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     n_prompt = len(ids)
     client_ns = time.monotonic_ns()
-    hdr = struct.pack("<IIIIQ", BF_LLM_MAGIC, n_prompt, n_gen, 0, client_ns)
+    hdr = struct.pack("<IIIIQ", BGS_LLM_MAGIC, n_prompt, n_gen, 0, client_ns)
     s.sendto(hdr + struct.pack(f"<{n_prompt}I", *ids), dest)
     deadline = time.perf_counter() + 30
     slot = None
     while time.perf_counter() < deadline and slot is None:
         head = page.u32(LLM_HEAD_OFF)
-        for k in range(BF_LLM_SLOTS):
-            idx = (head - 1 - k) % BF_LLM_SLOTS
+        for k in range(BGS_LLM_SLOTS):
+            idx = (head - 1 - k) % BGS_LLM_SLOTS
             if page.slot(idx)[7] == client_ns:
                 slot = idx
                 break
@@ -67,7 +67,7 @@ def main():
     ids = tok(a.prompt).input_ids
     mm, base = open_page()
     page = Page(mm, base)
-    dest = ("127.0.0.1", BF_LLM_PORT)
+    dest = ("127.0.0.1", BGS_LLM_PORT)
 
     counter = [0]
     stop = [False]

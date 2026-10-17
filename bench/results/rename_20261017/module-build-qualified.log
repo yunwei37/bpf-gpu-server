@@ -1,0 +1,18 @@
+make CC=gcc-15 -C /usr/src/linux-headers-7.3.0-070300rc3-generic M=/tmp/bpf-gpu-server-rename-j33wqkyl/module-build modules
+make[1]: Entering directory '/usr/src/linux-headers-7.3.0-070300rc3-generic'
+make[2]: Entering directory '/tmp/bpf-gpu-server-rename-j33wqkyl/module-build'
+warning: the compiler differs from the one used to build the kernel
+  The kernel was built by: x86_64-linux-gnu-gcc-15 (Ubuntu 15.2.0-12ubuntu1) 15.2.0
+  You are using:           gcc-15 (Ubuntu 15.2.0-14ubuntu1~24~ppa1) 15.2.0
+warning: pahole version differs from the one used to build the kernel
+  The kernel was built with: 130
+  You are using:             125
+  CC [M]  bpf_gpu_server_tx.o
+  MODPOST Module.symvers
+  CC [M]  bpf_gpu_server_tx.mod.o
+  CC [M]  .module-common.o
+  LD [M]  bpf_gpu_server_tx.ko
+  BTF [M] bpf_gpu_server_tx.ko
+Skipping BTF generation for bpf_gpu_server_tx.ko due to unavailability of vmlinux
+make[2]: Leaving directory '/tmp/bpf-gpu-server-rename-j33wqkyl/module-build'
+make[1]: Leaving directory '/usr/src/linux-headers-7.3.0-070300rc3-generic'

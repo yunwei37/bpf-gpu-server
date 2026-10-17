@@ -45,8 +45,8 @@ def worker_cpu_snapshot(pid):
     error=_libc.clock_getcpuclockid(pid,ctypes.byref(clock))
     if error: raise OSError(error,os.strerror(error))
     process=time.clock_gettime_ns(clock.value)
-    tx_path=Path("/sys/module/bfusion_tx/parameters/tx_cpu_ns")
-    tx=int(tx_path.read_text()) if Path("/sys/module/bfusion_tx").exists() else 0
+    tx_path=Path("/sys/module/bpf_gpu_server_tx/parameters/tx_cpu_ns")
+    tx=int(tx_path.read_text()) if Path("/sys/module/bpf_gpu_server_tx").exists() else 0
     return {"sample_begin_ns":begin,"sample_end_ns":time.monotonic_ns(),
             "executor_cpu_ns":process,"kernel_tx_cpu_ns":tx}
 
@@ -102,7 +102,7 @@ def request(client,ids,expected,gen=None):
 
 
 def connect():
-    client=socket.create_connection((os.environ.get("BF_BIND","127.0.0.1"),39403),timeout=60)
+    client=socket.create_connection((os.environ.get("BGS_BIND","127.0.0.1"),39403),timeout=60)
     client.setsockopt(socket.IPPROTO_TCP,socket.TCP_NODELAY,1)
     return client
 
@@ -218,7 +218,7 @@ def main():
     if args.user_network_wait_executor:
         if not args.user_network_executor: parser.error("--user-network-wait-executor requires --user-network-executor")
         executors["user-network-wait"]=args.user_network_wait_executor
-    weights="/workspaces/.cache/bpfusion/qwen25-05b-fp16.bin" if args.model=="Qwen/Qwen2.5-0.5B-Instruct" else args.model
+    weights="/workspaces/.cache/bpf-gpu-server/qwen25-05b-fp16.bin" if args.model=="Qwen/Qwen2.5-0.5B-Instruct" else args.model
     cases,_=oracle_cases(args.gen,name=args.model)
     matrix=[(1,1)] if args.preflight else [(1,1),(args.gen,1),(1,8),(args.gen,8)]
     repetitions=1 if args.preflight else 5
@@ -229,7 +229,7 @@ def main():
             raw.write(json.dumps({"event":event,**values})+"\n"); raw.flush()
         import torch, transformers
         emit("metadata",utc=time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime()),commit=command("git","rev-parse","HEAD"),
-             executors=executors,model=args.model,server=[os.environ.get("BF_BIND","127.0.0.1"),39403],
+             executors=executors,model=args.model,server=[os.environ.get("BGS_BIND","127.0.0.1"),39403],
              network_control={name:("native epoll_pwait2 60000ns wait" if name=="user-network-wait" else "native epoll busy polling") for name in executors if name.startswith("user-network")},
              worker_cpu="POSIX executor process CPU + adjusted kernel TX task CPU; excludes RX/softirq/BPF and other TCP work; read brackets retained",
              kernel=platform.release(),torch=torch.__version__,transformers=transformers.__version__,
@@ -247,11 +247,11 @@ def main():
             cells=matrix[pair%len(matrix):]+matrix[:pair%len(matrix)]
             for mode in modes:
                 executor=None
-                with tempfile.TemporaryDirectory(prefix="bpfusion-dispatch-") as tmp:
+                with tempfile.TemporaryDirectory(prefix="bpf-gpu-server-dispatch-") as tmp:
                     logpath=Path(tmp)/"executor.log"
                     try:
-                        if not mode.startswith("user-network"):command("./build/bpfusion_load","stream-attach")
-                        else:assert not Path("/sys/module/bfusion_tx").exists(),"kernel TX must be absent for network control"
+                        if not mode.startswith("user-network"):command("./build/bpf_gpu_server_load","stream-attach")
+                        else:assert not Path("/sys/module/bpf_gpu_server_tx").exists(),"kernel TX must be absent for network control"
                         binary=executors[mode]
                         started=time.monotonic()
                         with logpath.open("w") as log:
@@ -289,23 +289,23 @@ def main():
                             assert "network=userspace epoll" in log,log
                             expected_wait="epoll_pwait2 timeout_ns=60000" if mode=="user-network-wait" else "busy epoll_wait timeout_ms=0"
                             assert "userspace completion wait="+expected_wait in log,log
-                            assert not Path("/sys/module/bfusion_tx").exists()
+                            assert not Path("/sys/module/bpf_gpu_server_tx").exists()
                         if "device_graph_launches=" in log:
                             model_steps=4*(1+args.gen)+count*sum(gen for gen,_ in matrix)
                             assert f"device_graph_launches={model_steps} graph_error=0 banks=8" in log,log
                             if not args.preflight: assert "max_active=8" in log,log
-                        emit("executor",pair=pair,mode=mode,log=log,stats=command("./build/bpfusion_load","stats") if not mode.startswith("user-network") else None)
+                        emit("executor",pair=pair,mode=mode,log=log,stats=command("./build/bpf_gpu_server_load","stats") if not mode.startswith("user-network") else None)
                     except Exception as error:
                         emit("failure",pair=pair,mode=mode,error=repr(error),
                              log=logpath.read_text() if logpath.exists() else "",
-                             stats=command("./build/bpfusion_load","stats") if not mode.startswith("user-network") else None)
+                             stats=command("./build/bpf_gpu_server_load","stats") if not mode.startswith("user-network") else None)
                         raise
                     finally:
                         if executor is not None and executor.poll() is None:
                             executor.terminate(); executor.wait(timeout=60)
-                        command("./build/bpfusion_load","stream-detach")
-                        command("./build/bpfusion_load","detach","lo")
-                        for name in ("bpfusion_ctl","bpfusion_stats","bpfusion_db"):
+                        command("./build/bpf_gpu_server_load","stream-detach")
+                        command("./build/bpf_gpu_server_load","detach","lo")
+                        for name in ("bgs_ctl","bgs_stats","bgs_db"):
                             Path("/sys/fs/bpf",name).unlink(missing_ok=True)
     analyze(output)
 

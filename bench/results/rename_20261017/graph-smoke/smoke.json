@@ -1,0 +1,30 @@
+[
+  {
+    "operation": "matmul",
+    "transport": "native",
+    "requests": 16,
+    "exit": 0,
+    "status": "PASS"
+  },
+  {
+    "operation": "matmul",
+    "transport": "kernel",
+    "requests": 16,
+    "exit": 0,
+    "status": "PASS"
+  },
+  {
+    "operation": "fft",
+    "transport": "native",
+    "requests": 16,
+    "exit": 0,
+    "status": "PASS"
+  },
+  {
+    "operation": "fft",
+    "transport": "kernel",
+    "requests": 16,
+    "exit": 0,
+    "status": "PASS"
+  }
+]

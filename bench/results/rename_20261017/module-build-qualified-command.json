@@ -1,0 +1,11 @@
+{
+  "command": [
+    "make",
+    "CC=gcc-15",
+    "KDIR=/usr/src/linux-headers-7.3.0-070300rc3-generic"
+  ],
+  "exit": 0,
+  "elapsed_s": 1.813529102015309,
+  "loaded": false,
+  "source_copy_includes_relative_shared_headers": true
+}

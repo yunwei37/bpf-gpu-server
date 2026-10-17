@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""Capture upstream cuBLAS/cuFFT graphs and hand opaque buffers to BPFusion.
+"""Capture upstream cuBLAS/cuFFT graphs and hand opaque buffers to bpf-gpu-server.
 
 Use the existing TCP/HTTP frame, with input and output lengths both 64.
 Words represent IEEE float32 bit patterns, without numeric conversion.
@@ -45,19 +45,19 @@ def main():
     if args.seconds<=0: parser.error("--seconds must be positive")
     if args.repeat<=0: parser.error("--repeat must be positive")
     lib=ctypes.CDLL(str(args.library.resolve()))
-    for name in ["bf_graph_abi_version","bf_graph_max_slots","bf_graph_max_words"]:
+    for name in ["bgs_graph_abi_version","bgs_graph_max_slots","bgs_graph_max_words"]:
         getattr(lib,name).restype=ctypes.c_uint
-    if lib.bf_graph_abi_version()!=1: raise RuntimeError("unsupported graph ABI")
-    if lib.bf_graph_max_words()<64: raise RuntimeError("example needs 64 words")
-    slots=lib.bf_graph_max_slots()
+    if lib.bgs_graph_abi_version()!=1: raise RuntimeError("unsupported graph ABI")
+    if lib.bgs_graph_max_words()<64: raise RuntimeError("example needs 64 words")
+    slots=lib.bgs_graph_max_slots()
     graphs,inputs,outputs,weights=capture_graphs(args.operation,slots,args.repeat)
     Array=ctypes.c_uint64*slots
     graph_ptrs=Array(*(g.raw_cuda_graph() for g in graphs))
     input_ptrs=Array(*(x.data_ptr() for x in inputs))
     output_ptrs=Array(*(y.data_ptr() for y in outputs))
-    lib.bf_graph_serve.argtypes=[ctypes.POINTER(ctypes.c_uint64)]*3+[ctypes.c_uint]*3
-    lib.bf_graph_serve.restype=ctypes.c_int
-    result=lib.bf_graph_serve(graph_ptrs,input_ptrs,output_ptrs,64,64,args.seconds)
+    lib.bgs_graph_serve.argtypes=[ctypes.POINTER(ctypes.c_uint64)]*3+[ctypes.c_uint]*3
+    lib.bgs_graph_serve.restype=ctypes.c_int
+    result=lib.bgs_graph_serve(graph_ptrs,input_ptrs,output_ptrs,64,64,args.seconds)
     if result: raise SystemExit(result)
 
 if __name__=="__main__":

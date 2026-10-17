@@ -1,0 +1,2 @@
+sockhash capacity follows somaxconn=4096
+stream parser/verdict and sockops attached to current Workspace cgroup

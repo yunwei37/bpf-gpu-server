@@ -1,0 +1,13 @@
+{
+  "command": [
+    "make",
+    "BUILD=/tmp/bpf-gpu-server-rename-j33wqkyl/ordinary-build",
+    "all",
+    "graph-server-kernel-network",
+    "graph-server-user-network-wait",
+    "vllm-mixed-kernel-network",
+    "vllm-mixed-user-network-wait",
+    "VLLM_PYTHON=/tmp/bpfusion-mixed-integration-n4cog5c6/runtime/bin/python"
+  ],
+  "exit": 0
+}

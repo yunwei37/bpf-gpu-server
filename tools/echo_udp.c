@@ -3,7 +3,7 @@
 /* SPDX-License-Identifier: Apache-2.0
  * Baseline: plain UDP userspace echo server, one thread, pinned.
  *
- * This is the "ordinary userspace round trip" the BPFusion path is compared
+ * This is the "ordinary userspace round trip" the bpf-gpu-server path is compared
  * against: recvfrom -> (optional work) -> sendto, no eBPF, no control page, no
  * GPU. It replies with the first 16 floats of the request so the wire cost is
  * comparable.

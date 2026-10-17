@@ -44,14 +44,14 @@ def main():
     torch.cuda.empty_cache()
     env = dict(os.environ, PYTHONPATH="executor")
     for mode in ("userspace", "kernel"):
-        subprocess.run(["./build/bpfusion_load", "detach", "lo"], check=True)
-        subprocess.run(["./build/bpfusion_load", "attach", "lo"], check=True)
+        subprocess.run(["./build/bpf_gpu_server_load", "detach", "lo"], check=True)
+        subprocess.run(["./build/bpf_gpu_server_load", "attach", "lo"], check=True)
         loaded = False
         executor = None
-        log_path = f"/tmp/bpfusion-qwen-{mode}.log"
+        log_path = f"/tmp/bpf-gpu-server-qwen-{mode}.log"
         try:
             if mode == "kernel":
-                subprocess.run(["./build/bpfusion_load", "tx-load"], check=True)
+                subprocess.run(["./build/bpf_gpu_server_load", "tx-load"], check=True)
                 loaded = True
             args = ["python3", "executor/llm_executor.py", "--tcp", "--seconds", "300"]
             if mode == "kernel":
@@ -94,9 +94,9 @@ def main():
                 print(open(log_path).read(), flush=True)
             if loaded:
                 lib = ctypes.CDLL(None, use_errno=True)
-                ret = lib.syscall(176, b"bfusion_tx", 0)  # x86_64 delete_module
+                ret = lib.syscall(176, b"bpf_gpu_server_tx", 0)  # x86_64 delete_module
                 assert ret == 0, os.strerror(ctypes.get_errno())
-            subprocess.run(["./build/bpfusion_load", "detach", "lo"], check=True)
+            subprocess.run(["./build/bpf_gpu_server_load", "detach", "lo"], check=True)
 
 
 if __name__ == "__main__":

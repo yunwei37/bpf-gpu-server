@@ -17,7 +17,7 @@ parser.add_argument("--executor",default="./build/qwen")
 parser.add_argument("--model",default="Qwen/Qwen2.5-0.5B-Instruct")
 args=parser.parse_args()
 user_network=Path(args.executor).name=="qwen_graph_user_network"
-weights="/workspaces/.cache/bpfusion/qwen25-05b-fp16.bin" if args.model=="Qwen/Qwen2.5-0.5B-Instruct" else args.model
+weights="/workspaces/.cache/bpf-gpu-server/qwen25-05b-fp16.bin" if args.model=="Qwen/Qwen2.5-0.5B-Instruct" else args.model
 cases,_=oracle_cases(8,name=args.model)
 packets=[]; stop=threading.Event()
 with socket.socket(socket.AF_PACKET,socket.SOCK_RAW,socket.htons(0x0800)) as capture:
@@ -40,11 +40,11 @@ with socket.socket(socket.AF_PACKET,socket.SOCK_RAW,socket.htons(0x0800)) as cap
                 "token_bytes":len(body)-header_bytes if kind=="header" and header_bytes else len(body) if kind=="tokens" else 0})
     observer=threading.Thread(target=collect); observer.start()
     executor=None
-    with tempfile.TemporaryDirectory(prefix="bpfusion-tcp-trace-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="bpf-gpu-server-tcp-trace-") as tmp:
         logpath=Path(tmp)/"executor.log"
         try:
-            if not user_network: command("./build/bpfusion_load","stream-attach")
-            else: assert not Path("/sys/module/bfusion_tx").exists()
+            if not user_network: command("./build/bpf_gpu_server_load","stream-attach")
+            else: assert not Path("/sys/module/bpf_gpu_server_tx").exists()
             with logpath.open("w") as log:
                 executor=subprocess.Popen([args.executor,weights,"60"],stdout=log,stderr=subprocess.STDOUT)
             while "resident Qwen ready" not in logpath.read_text():
@@ -60,8 +60,8 @@ with socket.socket(socket.AF_PACKET,socket.SOCK_RAW,socket.htons(0x0800)) as cap
             for packet in packets: print(json.dumps(packet),flush=True)
             if executor is not None:
                 executor.terminate(); executor.wait(timeout=60)
-                print(json.dumps({"event":"executor","log":logpath.read_text(),"stats":None if user_network else command("./build/bpfusion_load","stats")}),flush=True)
-            command("./build/bpfusion_load","stream-detach")
-            command("./build/bpfusion_load","detach","lo")
-            for name in ("bpfusion_ctl","bpfusion_stats","bpfusion_db"):
+                print(json.dumps({"event":"executor","log":logpath.read_text(),"stats":None if user_network else command("./build/bpf_gpu_server_load","stats")}),flush=True)
+            command("./build/bpf_gpu_server_load","stream-detach")
+            command("./build/bpf_gpu_server_load","detach","lo")
+            for name in ("bgs_ctl","bgs_stats","bgs_db"):
                 Path("/sys/fs/bpf",name).unlink(missing_ok=True)

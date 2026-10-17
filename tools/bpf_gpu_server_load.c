@@ -1,10 +1,10 @@
 /* SPDX-License-Identifier: Apache-2.0
- * BPFusion: load and attach the ingress classifier, report its counters.
+ * bpf-gpu-server: load and attach the ingress classifier, report its counters.
  *
- *   bpfusion_load attach [ifname]   create clsact, load, attach tc ingress
- *   bpfusion_load detach [ifname]   remove the filter and the clsact qdisc
- *   bpfusion_load tx-load [module.ko] load kernel TX with the pinned map FD
- *   bpfusion_load stats             print BPF counters and page header
+ *   bpf_gpu_server_load attach [ifname]   create clsact, load, attach tc ingress
+ *   bpf_gpu_server_load detach [ifname]   remove the filter and the clsact qdisc
+ *   bpf_gpu_server_load tx-load [module.ko] load kernel TX with the pinned map FD
+ *   bpf_gpu_server_load stats             print BPF counters and page header
  *
  * The tc ingress hook is used because a `BPF_PROG_TYPE_SOCKET_FILTER` socket
  * filter exposes only helpers, not `skb->remote_ip4`/`remote_port`, on this
@@ -26,7 +26,7 @@
 #include <bpf/bpf.h>
 #include <bpf/libbpf.h>
 
-#include "bpfusion_queue.h"
+#include "bpf_gpu_server_queue.h"
 
 static const char *stats_name[] = {"seen pkts", "ip+udp/ip+tcp pkts",
 				   "magic pkts", "drops", "published",
@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 	struct bpf_object *bo;
 	struct bpf_program *prog;
 	int err, ctl_fd, stats_fd;
-	struct bf_page *page;
+	struct bgs_page *page;
 	struct bpf_tc_hook hook;
 	struct bpf_tc_opts opts;
 	uint64_t v;
@@ -50,27 +50,27 @@ int main(int argc, char **argv)
 	int stream_mode = !strcmp(cmd, "stream-attach") || uring_mode;
 
 	if (!strcmp(cmd, "stream-detach")) {
-        const char *uring_pins[]={"/sys/fs/bpf/bpfusion_uring_link",
-            "/sys/fs/bpf/bpfusion_uring_bind_link","/sys/fs/bpf/bpfusion_uring_owner",
-            "/sys/fs/bpf/bpfusion_pending"};
+        const char *uring_pins[]={"/sys/fs/bpf/bgs_uring_link",
+            "/sys/fs/bpf/bgs_uring_bind_link","/sys/fs/bpf/bgs_uring_owner",
+            "/sys/fs/bpf/bgs_pending"};
         for (unsigned j=0;j<sizeof(uring_pins)/sizeof(uring_pins[0]);j++)
             if (unlink(uring_pins[j]) && errno!=ENOENT) { perror("unlink io_uring"); return 1; }
-		if (unlink("/sys/fs/bpf/bpfusion_stream_link") && errno != ENOENT) {
+		if (unlink("/sys/fs/bpf/bgs_stream_link") && errno != ENOENT) {
 			perror("unlink stream link");
 			return 1;
 		}
-		if (unlink("/sys/fs/bpf/bpfusion_streams") && errno != ENOENT) {
+		if (unlink("/sys/fs/bpf/bgs_streams") && errno != ENOENT) {
 			perror("unlink stream map"); return 1;
 		}
 		puts("stream sockops detached");
 		return 0;
 	}
 	if (!strcmp(cmd, "tx-load")) {
-		const char *path = argc > 2 ? argv[2] : "module/bfusion_tx.ko";
+		const char *path = argc > 2 ? argv[2] : "module/bpf_gpu_server_tx.ko";
 		char params[64];
 		int mod_fd = open(path, O_RDONLY | O_CLOEXEC);
 
-		ctl_fd = bpf_obj_get("/sys/fs/bpf/bpfusion_ctl");
+		ctl_fd = bpf_obj_get("/sys/fs/bpf/bgs_ctl");
 		if (mod_fd < 0 || ctl_fd < 0) {
 			perror("open module/map");
 			if (mod_fd >= 0) close(mod_fd);
@@ -105,29 +105,29 @@ int main(int argc, char **argv)
 		/* Drop stale pins from a previous run: a fresh object otherwise
 		 * cannot take the same pin path, and the daemon would map the
 		 * *old* page while the new program writes to the new one. */
-		unlink("/sys/fs/bpf/bpfusion_ctl");
-		unlink("/sys/fs/bpf/bpfusion_stats");
-		unlink("/sys/fs/bpf/bpfusion_db");
-        unlink("/sys/fs/bpf/bpfusion_pending");
+		unlink("/sys/fs/bpf/bgs_ctl");
+		unlink("/sys/fs/bpf/bgs_stats");
+		unlink("/sys/fs/bpf/bgs_db");
+        unlink("/sys/fs/bpf/bgs_pending");
 	}
 
 	if (!strcmp(cmd, "stats")) {
 		/* Read the *pinned* maps: the running program writes to those,
 		 * not to a freshly loaded copy. */
-		ctl_fd = bpf_obj_get("/sys/fs/bpf/bpfusion_ctl");
-		stats_fd = bpf_obj_get("/sys/fs/bpf/bpfusion_stats");
+		ctl_fd = bpf_obj_get("/sys/fs/bpf/bgs_ctl");
+		stats_fd = bpf_obj_get("/sys/fs/bpf/bgs_stats");
 		if (ctl_fd < 0 || stats_fd < 0) {
 			fprintf(stderr, "no pinned maps: %s\n", strerror(errno));
 			return 1;
 		}
-		page = (struct bf_page *)mmap(NULL, BF_PAGE_MMAP_BYTES,
+		page = (struct bgs_page *)mmap(NULL, BGS_PAGE_MMAP_BYTES,
 					      PROT_READ | PROT_WRITE,
 					      MAP_SHARED, ctl_fd, 0);
 		if (page == MAP_FAILED) {
 			perror("mmap ctl");
 			return 1;
 		}
-        int context=bpf_obj_get("/sys/fs/bpf/bpfusion_uring_owner");
+        int context=bpf_obj_get("/sys/fs/bpf/bgs_uring_owner");
         if (context>=0) { stats_name[4]="uring recycled"; close(context); }
 		for (i = 0; i < 16; i++) {
 			__u32 k = (__u32)i;
@@ -140,7 +140,7 @@ int main(int argc, char **argv)
 		       "ready=%u\n",
 		       page->head, page->done_seq, page->published, page->acked,
 		       page->drops, page->ready);
-		for (i = 0; i < 4 && i < BF_SLOTS; i++)
+		for (i = 0; i < 4 && i < BGS_SLOTS; i++)
 			printf("slot[%d]: state=%u id=%u client_ns=%llu x[0]=%f "
 			       "| done state=%u id=%u y[0]=%f\n",
 			       i, page->slots[i].state, page->slots[i].id,
@@ -150,7 +150,7 @@ int main(int argc, char **argv)
 		printf("llm_head=%u\n", page->llm_head);
         printf("llm_queued=%u sockhash_first_errno=%u\n",page->llm_queued,page->admission_pad);
         printf("llm_reserved=0x%x\n", page->llm_reserved);
-		for (i = 0; i < BF_LLM_SLOTS; i++)
+		for (i = 0; i < BGS_LLM_SLOTS; i++)
 			printf("llm[%d]: state=%u prompt=%u gen=%u produced=%u client_ns=%llu\n",
 			       i, page->llm[i].state, page->llm[i].n_prompt,
 			       page->llm[i].n_gen, page->llm[i].produced,
@@ -158,7 +158,7 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	bo = bpf_object__open_file(BF_BUILD_DIR "/fusion.bpf.o", NULL);
+	bo = bpf_object__open_file(BGS_BUILD_DIR "/server.bpf.o", NULL);
 	if (!bo) {
 		perror("open bpf object");
 		return 1;
@@ -193,20 +193,20 @@ int main(int argc, char **argv)
 
 		if (stream_mode) {
 			m = bpf_object__find_map_by_name(bo, "streams");
-			bpf_map__set_pin_path(m, "/sys/fs/bpf/bpfusion_streams");
+			bpf_map__set_pin_path(m, "/sys/fs/bpf/bgs_streams");
 		}
         if (uring_mode) {
             m = bpf_object__find_map_by_name(bo, "uring_owner");
-            bpf_map__set_pin_path(m,"/sys/fs/bpf/bpfusion_uring_owner");
+            bpf_map__set_pin_path(m,"/sys/fs/bpf/bgs_uring_owner");
             m=bpf_object__find_map_by_name(bo,"pending");
-            bpf_map__set_pin_path(m,"/sys/fs/bpf/bpfusion_pending");
+            bpf_map__set_pin_path(m,"/sys/fs/bpf/bgs_pending");
         }
 		m = bpf_object__find_map_by_name(bo, "ctl");
-		bpf_map__set_pin_path(m, "/sys/fs/bpf/bpfusion_ctl");
+		bpf_map__set_pin_path(m, "/sys/fs/bpf/bgs_ctl");
 		m = bpf_object__find_map_by_name(bo, "stats");
-		bpf_map__set_pin_path(m, "/sys/fs/bpf/bpfusion_stats");
+		bpf_map__set_pin_path(m, "/sys/fs/bpf/bgs_stats");
 		m = bpf_object__find_map_by_name(bo, "doorbell");
-		bpf_map__set_pin_path(m, "/sys/fs/bpf/bpfusion_db");
+		bpf_map__set_pin_path(m, "/sys/fs/bpf/bgs_db");
 	}
 	if ((err = bpf_object__load(bo))) {
 		fprintf(stderr, "load: %s\n", strerror(-err));
@@ -214,7 +214,7 @@ int main(int argc, char **argv)
 	}
 	ctl_fd = bpf_map__fd(bpf_object__find_map_by_name(bo, "ctl"));
 	stats_fd = bpf_map__fd(bpf_object__find_map_by_name(bo, "stats"));
-	page = (struct bf_page *)mmap(NULL, BF_PAGE_MMAP_BYTES, PROT_READ | PROT_WRITE,
+	page = (struct bgs_page *)mmap(NULL, BGS_PAGE_MMAP_BYTES, PROT_READ | PROT_WRITE,
 				      MAP_SHARED, ctl_fd, 0);
 	if (page == MAP_FAILED) {
 		perror("mmap ctl");
@@ -248,13 +248,13 @@ int main(int argc, char **argv)
 		prog = bpf_object__find_program_by_name(bo, "stream_sockops");
 		link = bpf_program__attach_cgroup(prog, cgroup);
 		if (!link || libbpf_get_error(link)) { fprintf(stderr, "sockops attach failed\n"); return 1; }
-		if (bpf_link__pin(link, "/sys/fs/bpf/bpfusion_stream_link")) {
+		if (bpf_link__pin(link, "/sys/fs/bpf/bgs_stream_link")) {
 			bpf_link__destroy(link); perror("stream link pin"); return 1;
 		}
         if (uring_mode) {
             const char *names[]={"uring_bind","uring_recycle"};
             const char *events[]={"io_uring_create","io_uring_complete"};
-            const char *paths[]={"/sys/fs/bpf/bpfusion_uring_bind_link","/sys/fs/bpf/bpfusion_uring_link"};
+            const char *paths[]={"/sys/fs/bpf/bgs_uring_bind_link","/sys/fs/bpf/bgs_uring_link"};
             for (unsigned j=0;j<2;j++) {
                 prog=bpf_object__find_program_by_name(bo,names[j]);
                 link=bpf_program__attach_tracepoint(prog,"io_uring",events[j]);

@@ -1,0 +1,10 @@
+{
+  "exit": 2,
+  "elapsed_s": 0.0031458670273423195,
+  "command": [
+    "make",
+    "-C",
+    "<copied-module-source>"
+  ],
+  "loaded": false
+}

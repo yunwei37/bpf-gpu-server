@@ -1,8 +1,8 @@
 /* SPDX-License-Identifier: Apache-2.0
- * BPFusion load client.
+ * bpf-gpu-server load client.
  *
  * Modes:
- *   own      one-at-a-time request/response against the BPFusion daemon
+ *   own      one-at-a-time request/response against the bpf-gpu-server daemon
  *   burst    send N back-to-back, then collect N (pipeline depth)
  *   verify   send an all-ones vector and check the returned y against a CPU
  *            reference of the same 16x16x16 network
@@ -25,7 +25,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "bpfusion_queue.h"
+#include "bpf_gpu_server_queue.h"
 
 static uint64_t now_ns(void)
 {
@@ -112,10 +112,10 @@ static void fill_x(float *x, uint32_t id)
 
 static int send_req(int s, struct sockaddr_in *to, uint32_t id)
 {
-	struct bf_req_hdr r;
+	struct bgs_req_hdr r;
 
 	memset(&r, 0, sizeof(r));
-	r.magic = BF_MAGIC;
+	r.magic = BGS_MAGIC;
 	r.client_ns = now_ns();
 	fill_x(r.x, id);
 	return (int)sendto(s, &r, sizeof(r), 0, (struct sockaddr *)to,
@@ -133,7 +133,7 @@ int main(int argc, char **argv)
 	struct sockaddr_in to;
 	int s;
 	uint64_t *rtt, *srv_pre, *srv_exec;
-	struct bf_resp_hdr resp;
+	struct bgs_resp_hdr resp;
 	int got = 0, lost = 0, bad = 0;
 	uint64_t loop_ms = 0;
 
@@ -153,9 +153,9 @@ int main(int argc, char **argv)
 	memset(&to, 0, sizeof(to));
 	to.sin_family = AF_INET;
 	{
-		/* Default loopback; BF_DEST points the client at a veth/NIC
+		/* Default loopback; BGS_DEST points the client at a veth/NIC
 		 * address so a tc ingress hook on a real device is exercised. */
-		const char *dst = getenv("BF_DEST");
+		const char *dst = getenv("BGS_DEST");
 
 		to.sin_addr.s_addr = dst ? inet_addr(dst)
 					 : htonl(INADDR_LOOPBACK);
@@ -180,10 +180,10 @@ int main(int argc, char **argv)
 
 		memset(&resp, 0, sizeof(resp));
 		{
-			struct bf_req_hdr r;
+			struct bgs_req_hdr r;
 
 			memset(&r, 0, sizeof(r));
-			r.magic = BF_MAGIC;
+			r.magic = BGS_MAGIC;
 			r.client_ns = now_ns();
 			/* A scale that keeps the 16x16 stack's output away from
 			 * underflow, so the comparison is meaningful. */
@@ -320,7 +320,7 @@ int main(int argc, char **argv)
 			}
 			r = (int)recvfrom(s, &resp, sizeof(resp), 0,
 					  (struct sockaddr *)&from, &fl);
-			if (r <= 0 || resp.magic != BF_MAGIC ||
+			if (r <= 0 || resp.magic != BGS_MAGIC ||
 			    resp.y[0] != resp.y[0]) {
 				lost++;
 				/* The server may have exited mid-run; without

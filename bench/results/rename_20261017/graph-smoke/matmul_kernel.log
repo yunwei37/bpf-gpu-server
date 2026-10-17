@@ -1,0 +1,23 @@
+network=kernel BPF TCP controller; no GPU I/O CTA
+NET_READY pid=884751 port=39403 ring_bound=1 capacity=4096 sq=8192 cq=16384
+graph backend ready: abi=1 slots=8 input_words=64 output_words=64
+ADMISSION queued_peak=1
+RESULT {"accepted":4,"received":16,"sends":16,"bytes":4096,"completed":16,"closed":4,"aborted":0,"max_connections":1,"max_requests":1,"pending":0,"error":0,"head":16,"reserved":0,"dropped":0,"overflow":0,"sqhead":81,"sqtail":81,"cqhead":111,"cqtail":111,"trace_count":16,"trace_overflow":0}
+REPLY {"seq":0,"gen":64,"sends":1,"early":0,"bytes":256,"aborted":0,"client_ns":705717174813829}
+REPLY {"seq":1,"gen":64,"sends":1,"early":0,"bytes":256,"aborted":0,"client_ns":705717175043179}
+REPLY {"seq":2,"gen":64,"sends":1,"early":0,"bytes":256,"aborted":0,"client_ns":705717175314143}
+REPLY {"seq":3,"gen":64,"sends":1,"early":0,"bytes":256,"aborted":0,"client_ns":705717175465694}
+REPLY {"seq":4,"gen":64,"sends":1,"early":0,"bytes":256,"aborted":0,"client_ns":705717175679063}
+REPLY {"seq":5,"gen":64,"sends":1,"early":0,"bytes":256,"aborted":0,"client_ns":705717175834483}
+REPLY {"seq":6,"gen":64,"sends":1,"early":0,"bytes":256,"aborted":0,"client_ns":705717175981334}
+REPLY {"seq":7,"gen":64,"sends":1,"early":0,"bytes":256,"aborted":0,"client_ns":705717176129099}
+REPLY {"seq":8,"gen":64,"sends":1,"early":0,"bytes":256,"aborted":0,"client_ns":705717176316402}
+REPLY {"seq":9,"gen":64,"sends":1,"early":0,"bytes":256,"aborted":0,"client_ns":705717176466710}
+REPLY {"seq":10,"gen":64,"sends":1,"early":0,"bytes":256,"aborted":0,"client_ns":705717176611485}
+REPLY {"seq":11,"gen":64,"sends":1,"early":0,"bytes":256,"aborted":0,"client_ns":705717176759098}
+REPLY {"seq":12,"gen":64,"sends":1,"early":0,"bytes":256,"aborted":0,"client_ns":705717176941882}
+REPLY {"seq":13,"gen":64,"sends":1,"early":0,"bytes":256,"aborted":0,"client_ns":705717177092735}
+REPLY {"seq":14,"gen":64,"sends":1,"early":0,"bytes":256,"aborted":0,"client_ns":705717177237700}
+REPLY {"seq":15,"gen":64,"sends":1,"early":0,"bytes":256,"aborted":0,"client_ns":705717177386055}
+CLEANUP ring_connections_buffers_released
+graph backend stopped: admitted=16 retired=16 graph_launches=16 graph_error=0

@@ -31,7 +31,7 @@ def map_metadata():
  result={}
  try:
   bpf=ctypes.CDLL("libbpf.so.1",use_errno=True)
-  for p in Path("/sys/fs/bpf").glob("bpfusion*"):
+  for p in Path("/sys/fs/bpf").glob("bgs_*"):
    fd=bpf.bpf_obj_get(str(p).encode())
    if fd<0:result[p.name]=dict(unavailable=ctypes.get_errno());continue
    try:
