@@ -1,0 +1,10 @@
+{
+  "command": [
+    "make",
+    "BUILD=<temporary-root>/ordinary-build",
+    "graph-network-client"
+  ],
+  "exit": 0,
+  "stdout": "g++ -DBGS_BUILD_DIR='\"/tmp/bpf-gpu-server-rename-j33wqkyl/ordinary-build\"' -O3 -std=c++17 -static -Ibpf/include bench/graph_network_client.cpp -o /tmp/bpf-gpu-server-rename-j33wqkyl/ordinary-build/graph_network_client\n",
+  "stderr": ""
+}

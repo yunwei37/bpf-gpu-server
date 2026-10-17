@@ -1,0 +1,15 @@
+{
+  "command": [
+    "g++",
+    "-O2",
+    "-std=c++17",
+    "-pthread",
+    "-Ibpf/include",
+    "bench/graph_network_client.cpp",
+    "-o",
+    "<temporary-root>/graph-network-client"
+  ],
+  "exit": 0,
+  "stderr": "",
+  "initial_controller_error": "First direct compiler invocation omitted the required include path; retained in client-build.json."
+}

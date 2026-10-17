@@ -1,0 +1,26 @@
+mkdir -p /tmp/bpf-gpu-server-rename-j33wqkyl/qwen-smoke/build16
+clang -DBGS_LLM_SLOTS=16 -DBGS_BUILD_DIR='"/tmp/bpf-gpu-server-rename-j33wqkyl/qwen-smoke/build16"' -O2 -g -target bpf -mcpu=v3 -D__TARGET_ARCH_x86 -I/usr/include/x86_64-linux-gnu -Ibpf/include -Wall -Werror -Wno-missing-declarations -Wno-unused-value -c bpf/server.bpf.c -o /tmp/bpf-gpu-server-rename-j33wqkyl/qwen-smoke/build16/server.bpf.o
+cc -DBGS_LLM_SLOTS=16 -DBGS_BUILD_DIR='"/tmp/bpf-gpu-server-rename-j33wqkyl/qwen-smoke/build16"' -O2 -g -Wall -Wextra -Wno-unused-parameter -Ibpf/include tools/bpf_gpu_server_load.c -o /tmp/bpf-gpu-server-rename-j33wqkyl/qwen-smoke/build16/bpf_gpu_server_load -lbpf -lelf -lz -lpthread
+/usr/local/cuda/bin/nvcc -DBGS_LLM_SLOTS=16 -DBGS_BUILD_DIR='"/tmp/bpf-gpu-server-rename-j33wqkyl/qwen-smoke/build16"' -O3 -std=c++17 -arch=sm_120 --cudart=none -dc -Xcompiler=-fPIC -Ibpf/include \
+	-DBGS_PAD_PREFILL -DBGS_PREFIX_RELEASE -DBGS_USER_NETWORK -DBGS_USER_NETWORK_WAIT  executor/vllm_mixed.cu -o /tmp/bpf-gpu-server-rename-j33wqkyl/qwen-smoke/build16/vllm_mixed_user_network_wait.so.o
+/usr/local/cuda/bin/nvcc -arch=sm_120 -dlink -Xcompiler=-fPIC /tmp/bpf-gpu-server-rename-j33wqkyl/qwen-smoke/build16/vllm_mixed_user_network_wait.so.o -o /tmp/bpf-gpu-server-rename-j33wqkyl/qwen-smoke/build16/vllm_mixed_user_network_wait.so.dlink.o
+g++ -shared -Wl,-z,defs /tmp/bpf-gpu-server-rename-j33wqkyl/qwen-smoke/build16/vllm_mixed_user_network_wait.so.o /tmp/bpf-gpu-server-rename-j33wqkyl/qwen-smoke/build16/vllm_mixed_user_network_wait.so.dlink.o /tmp/bpfusion-mixed-integration-n4cog5c6/runtime/lib/python3.12/site-packages/nvidia/cuda_runtime/lib/libcudart.so.12 -Wl,-rpath,/tmp/bpfusion-mixed-integration-n4cog5c6/runtime/lib/python3.12/site-packages/nvidia/cuda_runtime/lib/ -o /tmp/bpf-gpu-server-rename-j33wqkyl/qwen-smoke/build16/vllm_mixed_user_network_wait.so -lbpf -lelf -lz -lpthread
+ln -sf /workspaces/repository/executor/vllm_mixed.py /tmp/bpf-gpu-server-rename-j33wqkyl/qwen-smoke/build16/vllm_mixed_user_network_wait
+clang -DBGS_LLM_SLOTS=16 -DBGS_BUILD_DIR='"/tmp/bpf-gpu-server-rename-j33wqkyl/qwen-smoke/build16"' -O2 -g -target bpf -mcpu=v3 -D__TARGET_ARCH_x86 -I/usr/include/x86_64-linux-gnu -Ibpf/include -Wall -Werror -Wno-missing-declarations -Wno-unused-value -c bpf/kernel_tcp.bpf.c -o /tmp/bpf-gpu-server-rename-j33wqkyl/qwen-smoke/build16/kernel_tcp.bpf.o
+/usr/local/cuda/bin/nvcc -DBGS_LLM_SLOTS=16 -DBGS_BUILD_DIR='"/tmp/bpf-gpu-server-rename-j33wqkyl/qwen-smoke/build16"' -O3 -std=c++17 -arch=sm_120 --cudart=none -dc -Xcompiler=-fPIC -Ibpf/include \
+	-DBGS_PAD_PREFILL -DBGS_PREFIX_RELEASE -DBGS_URING_NETWORK -DBGS_URING_BPF_LOOP -DBGS_KERNEL_TCP -I/usr/src/linux-headers-7.3.0-070300rc3-generic/include/uapi  executor/vllm_mixed.cu -o /tmp/bpf-gpu-server-rename-j33wqkyl/qwen-smoke/build16/vllm_mixed_kernel_network.so.o
+In file included from /usr/src/linux-headers-7.3.0-070300rc3-generic/include/uapi/linux/bpf.h:11,
+                 from /usr/include/bpf/bpf.h:26,
+                 from executor/vllm_mixed.cu:4:
+/usr/src/linux-headers-7.3.0-070300rc3-generic/include/uapi/linux/types.h:10:2: warning: #warning "Attempt to use kernel headers from user space, see https://kernelnewbies.org/KernelHeaders" [-Wcpp]
+   10 | #warning "Attempt to use kernel headers from user space, see https://kernelnewbies.org/KernelHeaders"
+      |  ^~~~~~~
+In file included from /usr/src/linux-headers-7.3.0-070300rc3-generic/include/uapi/linux/bpf.h:11,
+                 from /usr/include/bpf/bpf.h:26,
+                 from executor/vllm_mixed.cu:4:
+/usr/src/linux-headers-7.3.0-070300rc3-generic/include/uapi/linux/types.h:10:2: warning: #warning "Attempt to use kernel headers from user space, see https://kernelnewbies.org/KernelHeaders" [-Wcpp]
+   10 | #warning "Attempt to use kernel headers from user space, see https://kernelnewbies.org/KernelHeaders"
+      |  ^~~~~~~
+/usr/local/cuda/bin/nvcc -arch=sm_120 -dlink -Xcompiler=-fPIC /tmp/bpf-gpu-server-rename-j33wqkyl/qwen-smoke/build16/vllm_mixed_kernel_network.so.o -o /tmp/bpf-gpu-server-rename-j33wqkyl/qwen-smoke/build16/vllm_mixed_kernel_network.so.dlink.o
+g++ -shared -Wl,-z,defs /tmp/bpf-gpu-server-rename-j33wqkyl/qwen-smoke/build16/vllm_mixed_kernel_network.so.o /tmp/bpf-gpu-server-rename-j33wqkyl/qwen-smoke/build16/vllm_mixed_kernel_network.so.dlink.o /tmp/bpfusion-mixed-integration-n4cog5c6/runtime/lib/python3.12/site-packages/nvidia/cuda_runtime/lib/libcudart.so.12 -Wl,-rpath,/tmp/bpfusion-mixed-integration-n4cog5c6/runtime/lib/python3.12/site-packages/nvidia/cuda_runtime/lib/ -o /tmp/bpf-gpu-server-rename-j33wqkyl/qwen-smoke/build16/vllm_mixed_kernel_network.so -lbpf -lelf -lz -lpthread
+ln -sf /workspaces/repository/executor/vllm_mixed.py /tmp/bpf-gpu-server-rename-j33wqkyl/qwen-smoke/build16/vllm_mixed_kernel_network

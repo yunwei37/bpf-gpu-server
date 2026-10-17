@@ -1,0 +1,14 @@
+{
+  "model": "qwen",
+  "source_revision": "f76db4c5dc24c5de06e02a353b1932254fccb1e5",
+  "exit": 1,
+  "elapsed_s": 16.087463886011392,
+  "command": [
+    "python",
+    "bench/smoke_paper_llm.py",
+    "--model",
+    "<pinned-qwen-checkpoint>",
+    "--output",
+    "../qwen-smoke"
+  ]
+}

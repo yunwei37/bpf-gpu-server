@@ -1,0 +1,38 @@
+[
+  {
+    "condition": "native16",
+    "mode": "native",
+    "requests": 32,
+    "checked_tokens": 2048,
+    "finite_reference_disagreements": 0,
+    "status": "PASS",
+    "server_exit": 0
+  },
+  {
+    "condition": "kernel16",
+    "mode": "kernel",
+    "requests": 32,
+    "checked_tokens": 2048,
+    "finite_reference_disagreements": 0,
+    "status": "PASS",
+    "server_exit": 0
+  },
+  {
+    "condition": "native32",
+    "mode": "native",
+    "requests": 32,
+    "checked_tokens": 2048,
+    "finite_reference_disagreements": 0,
+    "status": "PASS",
+    "server_exit": 0
+  },
+  {
+    "condition": "official",
+    "mode": "official",
+    "requests": 32,
+    "checked_tokens": 2048,
+    "finite_reference_disagreements": 0,
+    "status": "PASS",
+    "server_exit": 0
+  }
+]

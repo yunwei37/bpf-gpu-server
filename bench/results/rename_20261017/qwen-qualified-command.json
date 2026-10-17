@@ -1,0 +1,15 @@
+{
+  "model": "qwen",
+  "source_revision": "f8550e495df2e1c8931806416d850e3c7ad4ef42",
+  "exit": 0,
+  "elapsed_s": 238.71574416698422,
+  "command": [
+    "python",
+    "bench/smoke_paper_llm.py",
+    "--model",
+    "<pinned-qwen-checkpoint>",
+    "--output",
+    "../qwen-qualified-smoke"
+  ],
+  "environment": "Documented inference venv bin prepended to PATH; same interpreter for launcher and driver."
+}

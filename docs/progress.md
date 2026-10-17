@@ -259,3 +259,14 @@ syntax checked. The first LLM attempt fails before readiness/requests because
 this controller omitted inference-venv bin from PATH; its untouched failure is
 retained. Correct documented environment activation, not serving code or output
 criteria, is the repair. Two-model requests continue under that environment.
+
+## 2026-10-17 15:08 Los Angeles: renamed Qwen smoke complete
+
+The Qwen checkpoint passes native16/kernel16/native32/official:128requests,
+8192tokens plus32excluded gen1 warmups; all four server exits0, zero finite-
+reference disagreement flags in this run. Raw clients/workers and sanitized
+server logs are committed, together with the initial pre-readiness PATH failure.
+Ordinary Make graph-network-client also builds; initial direct compiler setup
+errors stay recorded. Smol follows in the same bounded two-model smoke run.
+All runtime source files remain those of f76db4c5; intervening changes only
+complete documentation/evidence and unused veth-example labels.

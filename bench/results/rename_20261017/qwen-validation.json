@@ -1,0 +1,18 @@
+{
+  "cells": 4,
+  "requests": 128,
+  "tokens": 8192,
+  "finite_reference_disagreements": 0,
+  "status": "PASS",
+  "raw_clients_and_workers_retained": true,
+  "server_log_api_key_lines_redacted": {
+    "qwen-initial-environment-failure/native16.server.log": 0,
+    "qwen-smoke/native32.server.log": 0,
+    "qwen-smoke/official.server.log": 0,
+    "qwen-smoke/kernel16.server.log": 0,
+    "qwen-smoke/native16.server.log": 0
+  },
+  "initial_environment_failure_preserved": true,
+  "core_runtime_source_revision": "f76db4c5",
+  "later_changes_during_execution": "docs, evidence and unused veth labels only"
+}

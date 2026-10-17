@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/tmp/bpf-gpu-server-rename-j33wqkyl/qwen-smoke/build16/vllm_mixed_user_network_wait", line 12, in <module>
+    from vllm import LLM
+ModuleNotFoundError: No module named 'vllm'

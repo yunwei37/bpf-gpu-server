@@ -23,5 +23,13 @@ without GPU/inference packages. All7182input paths and both figures’ numerical
 data are byte-identical to the preceding paper-owner-update replay. Both data
 figures are regenerated. The small veth example’s remaining short bfns/bfv
 labels are renamed to bgsns/bgsv and its shell syntax passes; it is not run.
-Two-model LLM smokes are still running at this checkpoint. All implementation/review is in this
+[Qwen smoke](qwen-smoke/smoke.json) now passes all four conditions:
+native16/kernel16/native32/official,128requests/8192tokens and32excluded gen1
+warmups. All servers exit0 and this run has0finite-reference disagreements.
+Raw clients/workers and sanitized server logs are retained. The initial omitted-
+venv-PATH failure happens before readiness or requests; its logs are retained in
+qwen-initial-environment-failure/. Documented environment activation fixes the
+controller invocation; serving source/criteria are unchanged. The ordinary
+Make graph-network-client target also builds; direct-compiler setup failures
+are retained. Smol smoke remains running at this checkpoint. All implementation/review is in this
 thread, with no delegated agent or new performance experiment.
