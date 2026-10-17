@@ -1,0 +1,58 @@
+{
+  "reviewer": "this thread; no subagents or external agent review",
+  "relative_links_checked": 974,
+  "link_failures": [],
+  "active_legacy_name_occurrences_all_explicitly_qualified": [
+    {
+      "file": "README.md",
+      "line": 3,
+      "reason": "Explicit former-name/migration mapping or unchanged historical operational identity."
+    },
+    {
+      "file": "README.md",
+      "line": 12,
+      "reason": "Explicit former-name/migration mapping or unchanged historical operational identity."
+    },
+    {
+      "file": "README.md",
+      "line": 14,
+      "reason": "Explicit former-name/migration mapping or unchanged historical operational identity."
+    },
+    {
+      "file": "README.md",
+      "line": 15,
+      "reason": "Explicit former-name/migration mapping or unchanged historical operational identity."
+    },
+    {
+      "file": "README.md",
+      "line": 16,
+      "reason": "Explicit former-name/migration mapping or unchanged historical operational identity."
+    },
+    {
+      "file": "README.md",
+      "line": 17,
+      "reason": "Explicit former-name/migration mapping or unchanged historical operational identity."
+    },
+    {
+      "file": "docs/progress.md",
+      "line": 24,
+      "reason": "Explicit former-name/migration mapping or unchanged historical operational identity."
+    },
+    {
+      "file": "docs/upstream-backends.md",
+      "line": 23,
+      "reason": "Explicit former-name/migration mapping or unchanged historical operational identity."
+    }
+  ],
+  "active_python_files_syntax_checked": 28,
+  "shell_syntax_pass": true,
+  "paper_untouched_by_this_thread": true,
+  "existing_archived_experiment_files_unchanged": true,
+  "mechanical_core_source_review": "source-review.json:39files checked; semantic defaults/ABI/wire values unchanged.",
+  "scope_growth": "Core39 files have zero net line growth; the existing model smoke uses matching archived references through its same CLI (net 4 lines). No new flags, dependencies, service, compatibility aliases or scheduler. Other edits are names, reader mapping and requested validation records.",
+  "tests": "normal make all, graph/mixed targets, graph-network-client, legacy module compile, graph4cells/64replies, LLM8cells/256requests/16384tokens/0reference disagreements, offline136PASS",
+  "ci": "No CI workflow or PR; direct main workflow.",
+  "limits": "Module compiled but not loaded; veth example syntax checked but not executed. Smoke runs are functional checks, not new performance evidence.",
+  "core_39_files_net_line_delta": 0,
+  "existing_llm_smoke_net_line_delta": 4
+}

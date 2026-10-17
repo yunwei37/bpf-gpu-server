@@ -270,3 +270,29 @@ Ordinary Make graph-network-client also builds; initial direct compiler setup
 errors stay recorded. Smol follows in the same bounded two-model smoke run.
 All runtime source files remain those of f76db4c5; intervening changes only
 complete documentation/evidence and unused veth-example labels.
+
+## 2026-10-17 15:11 Los Angeles: both renamed model smokes complete
+
+Smol also passes native16/kernel16/native32/official with128requests/8192tokens,
+zero finite-reference disagreement flags and four normal exits. Both models
+total256long-output requests/16384tokens plus64excluded gen1 warmups. Raw clients,
+workers and sanitized logs are retained. Official Smol logs a resource_tracker
+semaphore cleanup warning; preserve it and verify actual resources before final
+cleanup. All requested build, model, cuBLAS/cuFFT and offline checks now pass.
+Final acceptance checks current names/links, public delivery and original-state
+preservation; paper files and historical sources/results remain untouched.
+
+## 2026-10-17 15:12 Los Angeles: rename acceptance and cleanup
+
+Final self-audit finds no legacy names in active source outside the explicit
+README migration table and unchanged historical Workspace/automation identities.
+All974current documentation links/fragments and28active Python files pass checks;
+39core source files have zero net line growth and only name substitutions. The
+existing two-model smoke grows four lines for checkpoint-specific references.
+Both model runs have zero finite-reference disagreement flags; offline136checks
+and both graph oracles pass. The official Smol shutdown warning leaves no actual
+POSIX semaphore, GPU context, BPF pin or private key. Original PID1/10909 start
+times and foreign setup_env.sh remain. After byte-comparing copied raw clients
+and figures, this run’s temporary builds/caches/plotting environment are removed.
+No paper or existing archived data file changes. The requested rename is complete;
+final commit/push and public-file verification seal delivery, not a new speed claim.

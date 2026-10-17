@@ -1,0 +1,9 @@
+{
+  "date_utc": "2026-10-17T22:12:54.903782+00:00",
+  "owned_temporary_builds_model_caches_and_plotting_env_removed": true,
+  "active_process_or_fd_users_before_removal": [],
+  "selected_raw_client_and_offline_outputs_copied_and_byte_compared": true,
+  "original_runtime_retained": true,
+  "original_workspace_and_foreign_setup_retained": true,
+  "postrun_resources": "postrun-resources.json: no GPU apps/pins/private keys/POSIX semaphores"
+}

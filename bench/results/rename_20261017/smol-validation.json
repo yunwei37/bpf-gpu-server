@@ -1,0 +1,16 @@
+{
+  "cells": 4,
+  "requests": 128,
+  "tokens": 8192,
+  "finite_reference_disagreements": 0,
+  "status": "PASS",
+  "raw_clients_and_workers_retained": true,
+  "server_log_api_key_lines_redacted": {
+    "native32.server.log": 0,
+    "official.server.log": 0,
+    "kernel16.server.log": 0,
+    "native16.server.log": 0
+  },
+  "official_shutdown_warning": "One resource_tracker semaphore cleanup warning retained; actual postrun semaphore list is empty.",
+  "core_runtime_source_revision": "f76db4c5"
+}

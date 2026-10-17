@@ -1,5 +1,9 @@
 # bpf-gpu-server namespace migration
 
+**Status: complete.** Ordinary builds, both pinned models, real cuBLAS/cuFFT
+and the full offline paper replay pass. The project has no PR/CI workflow;
+validation and review are performed in this thread as requested.
+
 Reader branding was committed asaf91e8eb. The source migration changes loader,
 shared header, module, macro/environment, BPF pin and graph-export names; the
 [current mapping](../../../README.md) lists the public changes. Frozen raw data
@@ -31,5 +35,16 @@ venv-PATH failure happens before readiness or requests; its logs are retained in
 qwen-initial-environment-failure/. Documented environment activation fixes the
 controller invocation; serving source/criteria are unchanged. The ordinary
 Make graph-network-client target also builds; direct-compiler setup failures
-are retained. Smol smoke remains running at this checkpoint. All implementation/review is in this
+are retained. [Smol smoke](smol-smoke/smoke.json) also passes all four conditions:
+128requests/8192tokens,32excluded gen1 warmups,0finite-reference disagreements,
+all servers exit0. Official Smol shutdown logs one resource_tracker semaphore
+cleanup warning; it is retained. The [postrun resource check](postrun-resources.json)
+confirms no remaining semaphore, GPU context, BPF pin or private test key.
+Across both models:256long-output requests/16384tokens and64excluded warmups. All implementation/review is in this
 thread, with no delegated agent or new performance experiment.
+
+The [final audit](final-review.json) checks current names, all documentation
+links, paper/history preservation and the small implementation scope. Temporary
+validation environments/builds are removed only after copying their records;
+[cleanup](cleanup.json) records the actual result. Existing runtime, original
+PID starts and foreign setup_env.sh remain preserved.

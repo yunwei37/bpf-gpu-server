@@ -1,0 +1,15 @@
+{
+  "model": "smol",
+  "source_revision": "500f45af3bfd8c8d8d52939d3a8a8f355193c7f8",
+  "exit": 0,
+  "elapsed_s": 182.1343804220669,
+  "command": [
+    "python",
+    "bench/smoke_paper_llm.py",
+    "--model",
+    "<pinned-smol-checkpoint>",
+    "--output",
+    "../smol-qualified-smoke"
+  ],
+  "environment": "Documented inference venv bin prepended to PATH; same interpreter for launcher and driver."
+}
