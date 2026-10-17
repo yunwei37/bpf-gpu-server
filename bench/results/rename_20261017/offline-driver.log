@@ -1,0 +1,18 @@
+Replaying official_transport
+Replaying capacity
+Replaying active_wait
+Replaying reclamation
+Replaying nodelay
+Replaying mixed
+Replaying tcp_diagnostic
+Replaying perf
+Replaying graph screen and confirmation (90 cells)
+{
+  "output": "/tmp/bpf-gpu-server-rename-j33wqkyl/offline",
+  "counts": {
+    "PASS": 136,
+    "MISMATCH": 0,
+    "PAPER_CHANGED": 0
+  },
+  "elapsed_s": 208.83356730593368
+}

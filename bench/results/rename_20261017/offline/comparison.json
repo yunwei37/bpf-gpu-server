@@ -1,0 +1,959 @@
+{
+  "paper": "paper/bpf-gpu-server.tex",
+  "checks": [
+    {
+      "item": "Table 1 row 1 tokens/s",
+      "paper": 11645.0,
+      "recomputed": 11645.240382666903,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 1 row 1 P99 ms",
+      "paper": 3304.0,
+      "recomputed": 3304.045032554,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 1 row 1 CPU ms",
+      "paper": 0.835,
+      "recomputed": 0.8347008586458333,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 1 row 2 tokens/s",
+      "paper": 11645.0,
+      "recomputed": 11645.243594601623,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 1 row 2 P99 ms",
+      "paper": 3314.0,
+      "recomputed": 3313.97450154,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 1 row 2 CPU ms",
+      "paper": 0.812,
+      "recomputed": 0.8120799783159722,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 1 row 3 tokens/s",
+      "paper": 12245.0,
+      "recomputed": 12244.673615288024,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 1 row 3 P99 ms",
+      "paper": 611.0,
+      "recomputed": 610.729840268,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 1 row 3 CPU ms",
+      "paper": 8.545,
+      "recomputed": 8.544667963090278,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 1 row 4 tokens/s",
+      "paper": 11640.0,
+      "recomputed": 11639.615972446842,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 1 row 4 P99 ms",
+      "paper": 3337.0,
+      "recomputed": 3337.27146198,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 1 row 4 CPU ms",
+      "paper": 0.751,
+      "recomputed": 0.7506579376388889,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 1 row 5 tokens/s",
+      "paper": 12265.0,
+      "recomputed": 12265.069166721427,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 1 row 5 P99 ms",
+      "paper": 217.0,
+      "recomputed": 217.3564561939999,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 1 row 5 CPU ms",
+      "paper": 0.523,
+      "recomputed": 0.5233017905381945,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 1 row 6 tokens/s",
+      "paper": 12249.0,
+      "recomputed": 12249.355230542324,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 1 row 6 P99 ms",
+      "paper": 406.0,
+      "recomputed": 405.8691777779997,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 1 row 6 CPU ms",
+      "paper": 8.327,
+      "recomputed": 8.32699757484375,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 2 row 1 group_cpu ratio",
+      "paper": 1.011,
+      "recomputed": 1.0105983469606004,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 2 row 1 group_cpu low",
+      "paper": 0.995,
+      "recomputed": 0.994556299604005,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 2 row 1 group_cpu high",
+      "paper": 1.027,
+      "recomputed": 1.0268991501900344,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 2 row 1 p99 ratio",
+      "paper": 1.254,
+      "recomputed": 1.253609744249685,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 2 row 1 p99 low",
+      "paper": 0.514,
+      "recomputed": 0.5139474461644902,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 2 row 1 p99 high",
+      "paper": 3.058,
+      "recomputed": 3.0577783829959655,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 2 row 2 group_cpu ratio",
+      "paper": 1.019,
+      "recomputed": 1.0192581475446327,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 2 row 2 group_cpu low",
+      "paper": 0.967,
+      "recomputed": 0.9669459467067935,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 2 row 2 group_cpu high",
+      "paper": 1.074,
+      "recomputed": 1.0744004614470324,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 2 row 2 p99 ratio",
+      "paper": 1.16,
+      "recomputed": 1.1597326982518574,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 2 row 2 p99 low",
+      "paper": 0.497,
+      "recomputed": 0.4971152967818049,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 2 row 2 p99 high",
+      "paper": 2.706,
+      "recomputed": 2.7055693922548434,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 2 row 3 group_cpu ratio",
+      "paper": 1.129,
+      "recomputed": 1.1293504135768069,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 2 row 3 group_cpu low",
+      "paper": 0.956,
+      "recomputed": 0.9560695445549464,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 2 row 3 group_cpu high",
+      "paper": 1.334,
+      "recomputed": 1.3340372192692562,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 2 row 3 p99 ratio",
+      "paper": 2.589,
+      "recomputed": 2.589139706815807,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 2 row 3 p99 low",
+      "paper": 1.196,
+      "recomputed": 1.1956514942783991,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 2 row 3 p99 high",
+      "paper": 5.607,
+      "recomputed": 5.606687612142395,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 3 row 1 value 0",
+      "paper": 40.5,
+      "recomputed": 40.459793778,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 3 row 1 value 1",
+      "paper": 2.3,
+      "recomputed": 2.287216401999999,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 3 row 1 value 2",
+      "paper": 8842.0,
+      "recomputed": 8841.739650192545,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 3 row 1 value 3",
+      "paper": 11260.0,
+      "recomputed": 11260.439910080671,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 3 row 2 value 0",
+      "paper": 4157.0,
+      "recomputed": 4157,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 3 row 2 value 1",
+      "paper": 0.0,
+      "recomputed": 0,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 3 row 2 value 2",
+      "paper": 57600.0,
+      "recomputed": 57600,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 3 row 2 value 3",
+      "paper": 7793.0,
+      "recomputed": 7793.074795340105,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 3 row 2 value 4",
+      "paper": 11623.0,
+      "recomputed": 11623.04328286072,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 3 row 3 value 0",
+      "paper": 1.7,
+      "recomputed": 1.70153385421875,
+      "tolerance": 0.0050000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 3 row 3 value 1",
+      "paper": 0.63,
+      "recomputed": 0.6257389521875,
+      "tolerance": 0.0050000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 3 row 4 value 0",
+      "paper": 1.43,
+      "recomputed": 1.4344775707217263,
+      "tolerance": 0.0050000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 3 row 4 value 1",
+      "paper": 1.23,
+      "recomputed": 1.230083662562004,
+      "tolerance": 0.0050000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 3 row 4 value 2",
+      "paper": -14.0,
+      "recomputed": -14.248665321193277,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 3 row 5 value 0",
+      "paper": 3337.0,
+      "recomputed": 3337.27146198,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Table 3 row 5 value 1",
+      "paper": 217.0,
+      "recomputed": 217.3564561939999,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Figure 2 FFT N user",
+      "paper": 11.3,
+      "recomputed": 11.3,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "Figure 2 FFT K user",
+      "paper": 2.8,
+      "recomputed": 2.8,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "Figure 2 GEMM N user",
+      "paper": 11.3,
+      "recomputed": 11.3,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "Figure 2 GEMM K user",
+      "paper": 3.3,
+      "recomputed": 3.3,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "Figure 2 FFT N system",
+      "paper": 26.2,
+      "recomputed": 26.2,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "Figure 2 FFT K system",
+      "paper": 35.2,
+      "recomputed": 35.2,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "Figure 2 GEMM N system",
+      "paper": 26.2,
+      "recomputed": 26.2,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "Figure 2 GEMM K system",
+      "paper": 34.7,
+      "recomputed": 34.7,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "Figure 2 FFT N high-resolution total",
+      "paper": 37.56,
+      "recomputed": 37.56040957,
+      "tolerance": 0.0050000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Figure 2 FFT K high-resolution total",
+      "paper": 37.96,
+      "recomputed": 37.95902424,
+      "tolerance": 0.0050000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Figure 2 GEMM N high-resolution total",
+      "paper": 37.29,
+      "recomputed": 37.2862599,
+      "tolerance": 0.0050000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Figure 2 GEMM K high-resolution total",
+      "paper": 38.01,
+      "recomputed": 38.00506701,
+      "tolerance": 0.0050000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Figure 3 kernel category 0",
+      "paper": 26.7,
+      "recomputed": 26.700376759865158,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "Figure 3 native category 0",
+      "paper": 84.5,
+      "recomputed": 84.5213849287169,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "Figure 3 kernel category 1",
+      "paper": 43.8,
+      "recomputed": 43.81320642474718,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "Figure 3 native category 1",
+      "paper": 0.0,
+      "recomputed": 0,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Figure 3 kernel category 2",
+      "paper": 27.0,
+      "recomputed": 27.037477691850086,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "Figure 3 native category 2",
+      "paper": 0.0,
+      "recomputed": 0,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "Figure 3 kernel category 3",
+      "paper": 2.4,
+      "recomputed": 2.4489391235375706,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "Figure 3 native category 3",
+      "paper": 15.5,
+      "recomputed": 15.478615071283102,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "transport P99 difference and interval [0]",
+      "paper": -10.0,
+      "recomputed": -9.929468985999847,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "transport P99 difference and interval [1]",
+      "paper": -64.0,
+      "recomputed": -64.17832732903715,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "transport P99 difference and interval [2]",
+      "paper": 44.0,
+      "recomputed": 44.319389357037274,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "earlier group CPU reduction percent",
+      "paper": 18.7,
+      "recomputed": 18.66237690912631,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "capacity mean token time cost",
+      "paper": 0.033,
+      "recomputed": 0.0333075363489308,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "capacity device energy cost",
+      "paper": 0.34,
+      "recomputed": 0.3357184548611112,
+      "tolerance": 0.0050000001,
+      "status": "PASS"
+    },
+    {
+      "item": "host ratios [0]",
+      "paper": 0.99,
+      "recomputed": 0.9903122901797381,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "host ratios [1]",
+      "paper": 0.925,
+      "recomputed": 0.9250620665577036,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "host ratios [2]",
+      "paper": 0.988,
+      "recomputed": 0.9880403527402289,
+      "tolerance": 0.0005000001,
+      "status": "PASS"
+    },
+    {
+      "item": "one CPU adverse tail",
+      "paper": 2.6,
+      "recomputed": 2.589139706815807,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "kernel/native sample counts [0]",
+      "paper": 10086.0,
+      "recomputed": 10086,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "kernel/native sample counts [1]",
+      "paper": 2455.0,
+      "recomputed": 2455,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "sample count ratio",
+      "paper": 4.1,
+      "recomputed": 4.108350305498981,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "combined coordination percent",
+      "paper": 71.0,
+      "recomputed": 70.85068411659726,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "native networking percent",
+      "paper": 85.0,
+      "recomputed": 84.5213849287169,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "first/last ten-second TTFT [0]",
+      "paper": 235.0,
+      "recomputed": 235.10548226095196,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "first/last ten-second TTFT [1]",
+      "paper": 3003.0,
+      "recomputed": 3003.3561475930874,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "generation span",
+      "paper": 86.0,
+      "recomputed": 85.76463706774305,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "largest screen CPU reduction",
+      "paper": 5.8,
+      "recomputed": 5.847209168700839,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "screen request count million",
+      "paper": 2.52,
+      "recomputed": 2.52,
+      "tolerance": 0.0050000001,
+      "status": "PASS"
+    },
+    {
+      "item": "confirmation request count",
+      "paper": 600000.0,
+      "recomputed": 600000,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "main graph requests million",
+      "paper": 3.12,
+      "recomputed": 3.12,
+      "tolerance": 0.0050000001,
+      "status": "PASS"
+    },
+    {
+      "item": "observer range us [0]",
+      "paper": 2.0,
+      "recomputed": 1.989414,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "observer range us [1]",
+      "paper": 34.0,
+      "recomputed": 34.010208999999996,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "abstract CPU split [0]",
+      "paper": 11.3,
+      "recomputed": 11.3,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "abstract CPU split [1]",
+      "paper": 26.2,
+      "recomputed": 26.2,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "abstract CPU split [2]",
+      "paper": 2.8,
+      "recomputed": 2.8,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "abstract CPU split [3]",
+      "paper": 35.2,
+      "recomputed": 35.2,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "official tail near 0.6 seconds",
+      "paper": 0.6,
+      "recomputed": 0.6107298402679999,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "FFT/GEMM total CPU change percent [0]",
+      "paper": 1.1,
+      "recomputed": 1.0612628418151804,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "FFT/GEMM total CPU change percent [1]",
+      "paper": 1.9,
+      "recomputed": 1.927806950677824,
+      "tolerance": 0.050000000100000004,
+      "status": "PASS"
+    },
+    {
+      "item": "roughly 38 microseconds",
+      "paper": 38.0,
+      "recomputed": 37.70269018,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "approximate slot tail factor",
+      "paper": 15.0,
+      "recomputed": 15.35390998002536,
+      "tolerance": 1,
+      "status": "PASS"
+    },
+    {
+      "item": "approximate NODELAY tail factor",
+      "paper": 17.0,
+      "recomputed": 17.689534642468,
+      "tolerance": 1,
+      "status": "PASS"
+    },
+    {
+      "item": "LLM top request count",
+      "paper": 172800.0,
+      "recomputed": 172800,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "confirmation resource/mask/timing validity",
+      "recomputed": true,
+      "status": "PASS"
+    },
+    {
+      "item": "abstract final-experiment request lower bound",
+      "paper": 3400000.0,
+      "recomputed": 3465600,
+      "status": "PASS"
+    },
+    {
+      "item": "prespecified useful graph advantage",
+      "recomputed": false,
+      "status": "PASS"
+    },
+    {
+      "item": "main final-experiment failures",
+      "recomputed": 0,
+      "status": "PASS"
+    },
+    {
+      "item": "small-send diagnostic bytes and ACK wait [0]",
+      "paper": 4.0,
+      "recomputed": 4,
+      "tolerance": 0.5,
+      "status": "PASS"
+    },
+    {
+      "item": "small-send diagnostic bytes and ACK wait [1]",
+      "paper": 36.0,
+      "recomputed": 36,
+      "tolerance": 0.5,
+      "status": "PASS"
+    },
+    {
+      "item": "small-send diagnostic bytes and ACK wait [2]",
+      "paper": 41.0,
+      "recomputed": 41.564492,
+      "tolerance": 1,
+      "status": "PASS"
+    },
+    {
+      "item": "owned CLOSE_WAIT sockets",
+      "paper": 2947.0,
+      "recomputed": 2947,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "reclamation removed timeouts",
+      "paper": 4157.0,
+      "recomputed": 4157,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "screen cell count",
+      "paper": 60.0,
+      "recomputed": 60,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "graph request/reply bytes and connections [0]",
+      "paper": 280.0,
+      "recomputed": 280,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "graph request/reply bytes and connections [1]",
+      "paper": 256.0,
+      "recomputed": 256,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "graph request/reply bytes and connections [2]",
+      "paper": 128.0,
+      "recomputed": 128,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "LLM tokens/rate/duration/offered tokens [0]",
+      "paper": 192.0,
+      "recomputed": 192,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "LLM tokens/rate/duration/offered tokens [1]",
+      "paper": 60.0,
+      "recomputed": 60.0,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "LLM tokens/rate/duration/offered tokens [2]",
+      "paper": 12288.0,
+      "recomputed": 12288,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "LLM output tokens",
+      "paper": 64.0,
+      "recomputed": 64.0,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "logical CPUs",
+      "paper": 24.0,
+      "recomputed": 24,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "resident/official CPU factor range [0]",
+      "paper": 10.0,
+      "recomputed": 10.521953737622667,
+      "tolerance": 1,
+      "status": "PASS"
+    },
+    {
+      "item": "resident/official CPU factor range [1]",
+      "paper": 16.0,
+      "recomputed": 15.912419421075883,
+      "tolerance": 1,
+      "status": "PASS"
+    },
+    {
+      "item": "perf sample frequency Hz",
+      "paper": 499.0,
+      "recomputed": 499,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "graph repetitions [0]",
+      "paper": 1.0,
+      "recomputed": 1,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "graph repetitions [1]",
+      "paper": 16.0,
+      "recomputed": 16,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "graph repetitions [2]",
+      "paper": 256.0,
+      "recomputed": 256,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "service affinity counts [0]",
+      "paper": 1.0,
+      "recomputed": 1,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "service affinity counts [1]",
+      "paper": 2.0,
+      "recomputed": 2,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "frame header and word bits [0]",
+      "paper": 24.0,
+      "recomputed": 24,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "frame header and word bits [1]",
+      "paper": 32.0,
+      "recomputed": 32,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    },
+    {
+      "item": "active BPF timer us",
+      "paper": 60.0,
+      "recomputed": 60.0,
+      "tolerance": 0.5000000001,
+      "status": "PASS"
+    }
+  ],
+  "counts": {
+    "PASS": 136,
+    "MISMATCH": 0,
+    "PAPER_CHANGED": 0
+  },
+  "elapsed_s": 208.83356730593368,
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "matplotlib": "3.11.2",
+  "method": "Archived primary analyzers replay raw logs, native binary records and counters; current TeX tables, plots and prose provide expected values. Linear quantiles and five process-block t(df4), not pooled quantiles. Figures use recomputed unrounded data."
+}

@@ -1,0 +1,8 @@
+[
+  "Numerical agreement does not validate the paper's causal explanations.",
+  "'Throughput was identical' and 'whole-host totals were unchanged' are stronger than intervals crossing zero/one; neither equivalence nor exclusive total-CPU attribution was established.",
+  "The 32-slot full arm is native only. Capacity is shared architecturally, but an equal measured gain on kernel-owned 32 slots is not established.",
+  "Perf Figure 3 is one ordered pair, not five counterbalanced process blocks; networking ancestry may include unrelated packets and most kernel stacks contain unknown frames.",
+  "Final ordinary LLM performance trajectories retain finite-reference disagreements; exact replay qualifies finite traced cases, not every performance output.",
+  "Linux 7.3-rc3 with the tested io_uring BPF interfaces is required; stable-release/fresh-OS/general compatibility is not demonstrated."
+]

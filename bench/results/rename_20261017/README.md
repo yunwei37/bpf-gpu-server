@@ -17,6 +17,11 @@ relative shared headers; after copying those same headers, the qualified
 [build](module-build-qualified.log) exits0. Kernel/compiler/pahole warnings
 remain visible. No host package, symlink or configuration changes are made.
 
-Two-model LLM and full offline-artifact replay follow this source checkpoint;
-their completion is not claimed here. All implementation/review is in this
+The renamed-source [full offline replay](offline/comparison.md) now completes
+136PASS/0MISMATCH/0PAPER_CHANGED, exit0 in208.994s in a new plotting environment
+without GPU/inference packages. All7182input paths and both figures’ numerical
+data are byte-identical to the preceding paper-owner-update replay. Both data
+figures are regenerated. The small veth example’s remaining short bfns/bfv
+labels are renamed to bgsns/bgsv and its shell syntax passes; it is not run.
+Two-model LLM smokes are still running at this checkpoint. All implementation/review is in this
 thread, with no delegated agent or new performance experiment.

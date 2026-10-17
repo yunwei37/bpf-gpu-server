@@ -2,6 +2,7 @@
 
 原名 BPFusion。
 
+BGS_/bgs_ abbreviate bpf-gpu-server and keep BPF object names short.
 The project now uses the following source and command names. Archived raw data
 and historical findings keep their original commands so their records remain
 replayable; they describe the same project under its former name.
@@ -14,6 +15,7 @@ replayable; they describe the same project under its former name.
 | bfusion_tx.ko | bpf_gpu_server_tx.ko (legacy transport) |
 | BF_* macros and environment variables; bf_* symbols | BGS_*; bgs_* |
 | /sys/fs/bpf/bpfusion_* pins | /sys/fs/bpf/bgs_* pins |
+| bfns1/bfns2 and bfv0/bfv1 in the veth example | bgsns1/bgsns2 and bgsv0/bgsv1 |
 
 Rebuild the loader, BPF objects, executor and any caller of the graph C API
 together. Stop and detach an old instance with its own loader before switching;

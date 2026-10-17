@@ -246,3 +246,16 @@ the host. The LLM smoke now selects the correct frozen prompts/references for
 either pinned checkpoint using its existing --model argument. Commit this
 source/build checkpoint before model smokes and full offline replay. The README
 records all old/new names and the requirement to rebuild paired components.
+
+## 2026-10-17 15:06 Los Angeles: renamed-source offline replay
+
+Source migration f76db4c5 is published. Full raw-data replay on that source
+finishes136PASS/0MISMATCH/0PAPER_CHANGED in208.994s using a new plotting-only
+environment with GPU visibility disabled. The7182input paths and figure-data
+bytes match the earlier paper-owner-update replay; no archived filename or
+analyzer changes. All973current documentation relative links/fragments resolve.
+The remaining short veth namespace/interface labels are also renamed and shell
+syntax checked. The first LLM attempt fails before readiness/requests because
+this controller omitted inference-venv bin from PATH; its untouched failure is
+retained. Correct documented environment activation, not serving code or output
+criteria, is the repair. Two-model requests continue under that environment.

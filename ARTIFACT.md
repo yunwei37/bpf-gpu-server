@@ -52,6 +52,9 @@ Workspace is required. Full Git tree:about4.24GB before archive compression.
 Current paper5b7dbb75: [full raw replay](bench/results/paper_artifact_20261017/author-update/README.md)
 completes136PASS/0MISMATCH/0PAPER_CHANGED, exit0 in214.085s. The previous
 rounding report is retained as historical evidence.
+The [post-rename replay](bench/results/rename_20261017/README.md) also passes
+all136checks, with the same7182inputs and identical figure data. Historical
+raw filenames are unchanged by the namespace migration.
 
 ## Complete paper-to-data map
 

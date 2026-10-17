@@ -1,0 +1,14 @@
+{
+  "source_revision": "f76db4c5dc24c5de06e02a353b1932254fccb1e5",
+  "exit": 0,
+  "elapsed_s": 208.9935247360263,
+  "command": [
+    "<new-plotting-env>/bin/python",
+    "bench/reproduce_paper.py",
+    "--output",
+    "../offline"
+  ],
+  "new_environment": true,
+  "gpu_visible": false,
+  "inference_packages": false
+}

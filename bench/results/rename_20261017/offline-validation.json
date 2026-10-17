@@ -1,0 +1,14 @@
+{
+  "counts": {
+    "PASS": 136,
+    "MISMATCH": 0,
+    "PAPER_CHANGED": 0
+  },
+  "input_count": 7182,
+  "input_list_unchanged": true,
+  "figure_data_byte_identical_to_pre_rename": true,
+  "new_plotting_environment": true,
+  "no_gpu_or_inference_packages": true,
+  "source_revision": "f76db4c5",
+  "underlying_analyzers_raw_data_tolerances_unchanged": true
+}
