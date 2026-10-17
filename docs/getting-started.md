@@ -18,7 +18,7 @@ Use an existing root shell or privileged development container with GPU/BPF/
 cgroup/bpffs access. These steps do not change the host kernel or driver.
 
 Current pins and TCP port 39403 are shared by prototype instances:finish an
-existing BPFusion run before attaching another. Keep the documented shell
+existing bpf-gpu-server run before attaching another. Keep the documented shell
 environment active for loader, server and client.
 
 Debian/Ubuntu build tools:

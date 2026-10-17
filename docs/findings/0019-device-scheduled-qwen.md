@@ -1,6 +1,6 @@
 # 0019: device-scheduled Qwen graphs and 64-token kernel TCP validation
 
-Observed 2026-10-10 UTC in the original BPFusion Workspace, RTX 5090,
+Observed 2026-10-10 UTC in the original bpf-gpu-server Workspace, RTX 5090,
 CUDA 13, Linux 7.3-rc3, PyTorch 2.14.1+cu130 and Transformers 5.19.0.
 Source base is `795e6044d530a6abb0dce0c74bac0d1da29834e6` plus the graph
 executor change recorded with this finding. The original exported

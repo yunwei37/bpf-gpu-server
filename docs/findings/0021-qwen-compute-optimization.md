@@ -864,7 +864,7 @@ particularly for prefill; larger bmm row shapes may select different numerical
 algorithms. Algebraic equivalence is not an exact-token qualification.
 
 Scope: source preparation,tests and measurement only in the existing
-BPFusion Workspace,current main. Production0/test0 at admission. Baseline is
+bpf-gpu-server Workspace,current main. Production0/test0 at admission. Baseline is
 the byte-exact current qwen_graph.py (also fc58faa). The temporary candidate
 is /tmp/bpfusion-qwen-pointwise-5mxeys8g/grouped_gqa/qwen_graph; its host
 qualification entry uses canonical build/qwen_graph_host_launch.so.
@@ -1006,7 +1006,7 @@ serving claim. It is a runnable computation improvement with numerical risks
 bounded by the independent oracle; another unqualified batching/matmul change
 does not offer stronger currently validated evidence.
 
-Scope: original BPFusion Workspace/main,no production/native/module/queue/
+Scope: original bpf-gpu-server Workspace/main,no production/native/module/queue/
 oracle/transport change at admission. Current basea98a316c7b992e5426fcea6584f57c2510795220
 has production byte-exactfc58faa. Temporary norm_prepare/qwen_graph adds four
 lines net: a default-backend compile function returns both original float32
@@ -1244,7 +1244,7 @@ canonical serial correctness control;kv_append_perf_baseline/qwen_graph and
 kv_append_perf_candidate/qwen_graph identical previously used test-local
 TCP_NODELAY native library. Both performance modes are resident eight-bank
 engines;the serial host variant is not a performance baseline.
-Comparator is the current best BPFusion implementation,component comparison.
+Comparator is the current best bpf-gpu-server implementation,component comparison.
 This cannot establish superiority over optimized serving. No service,
 installation,new model,mode,scheduler,owner or configuration entity.
 

@@ -2,7 +2,7 @@
 
 ## Current conclusions
 
-BPFusion is a working research prototype on its qualified Linux/GPU stack.
+bpf-gpu-server is a working research prototype on its qualified Linux/GPU stack.
 Its reusable result is Linux/eBPF connection and request/reply ownership around
 caller-supplied GPU execution. General superiority over efficient native TCP,
 exclusive total-CPU savings, production SLOs and arbitrary-backend compatibility

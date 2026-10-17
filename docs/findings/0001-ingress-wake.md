@@ -62,7 +62,7 @@ thread's `nanosleep()` starved the spinner outright (100 µs–2 s wakeups). The
 numbers are only trustworthy *after* the sampling loop was forced onto
 `now_ns()` deadlines with the spinner owning the ring buffer.
 
-## Consequence for the BPFusion design
+## Consequence for the bpf-gpu-server design
 
 A kernel module calling `wake_up()` on a wait-queue would cut the 2.4 µs p50 of
 the epoll path to roughly a task-scheduler wakeup. That cost has **not been

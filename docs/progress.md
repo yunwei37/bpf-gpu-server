@@ -24,7 +24,7 @@ Daily follow-up is attached to this same conversation through the app's
 heartbeat automation bpfusion, active at09:00 America/Los_Angeles daily.
 The user explicitly requested this daily upkeep/reflection on2026-10-16.
 No external implementation agent, Flux duty, new Workspace or competing
-experimental runner is introduced. Default previous state: no BPFusion
+experimental runner is introduced. Default previous state: no bpf-gpu-server
 heartbeat; change: one daily same-thread follow-up. Purpose: prevent upkeep
 and decisive next work from being lost between turns. Risk: unattended edits;
 existing Workspace/main/foreign-work boundaries and owner-only checks apply.
@@ -134,7 +134,7 @@ real reproduction/link/compatibility issues within this documented scope.
 
 Delivery checks complete after the later06:17shared-node outage:the same
 original Pod remains0restarts,the same PVC is attached/healthy,and original
-PID1/10909start times match. BPFusion's last measured invocation ended06:07:26.
+PID1/10909start times match. bpf-gpu-server's last measured invocation ended06:07:26.
 This thread sends no power/configuration action and preserves the existing
 infrastructure owner's recovery record. A postincident replay and independent
 raw/source audits pass again without rerunning GPU measurements or replacing
@@ -221,3 +221,16 @@ The current blocker for stronger paper claims remains interpretation/scope,
 not numerical disagreement; the negative graph performance exit still holds.
 The updated artifact documents this result while retaining the original mismatch.
 This thread edits no paper file and does not rerun closed GPU experiments.
+
+## 2026-10-17 14:56 Los Angeles: repository rename
+
+The user confirms bpf-gpu-server as the project name. This thread owns the
+repository outside paper/; the paper/blog/site remain with their owner.
+The immediate compatibility risk is mixed names across the loader, shared
+headers, BPF pin ownership, CUDA exports and smoke controllers. The substantive
+next action is one consistent namespace migration, preserving wire/layout,
+scheduler/defaults and archived experiment sources. First update reader-facing
+branding, then update active code/build interfaces and document the exact
+old/new mapping. Verify ordinary builds, both model checkpoints and transports,
+real cuBLAS/cuFFT oracles, then replay all paper numbers offline. All work and
+review stay in this thread; no historical negative result is reopened.

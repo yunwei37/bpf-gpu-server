@@ -87,7 +87,7 @@ output check. Interface labels are read-time labels; retain SLL2 indices.
 and route/physical-device receipt identify enp129s0 and
 128.114.59.130↔128.114.59.42 UDP41641 Tailscale transport.
 That capture also includes unrelated encrypted peer traffic; retain bounded
-headers only and attribute no carrier byte rate or energy to BPFusion.
+headers only and attribute no carrier byte rate or energy to bpf-gpu-server.
 This is cross-node Linux TCP over existing flannel/Tailscale and a physical
 Ethernet underlay,not bare-NIC TCP,GPUDirect or an OS-bypass service.
 Both preflight captures are stopped before full collection.

@@ -11,7 +11,7 @@ The source landscapes below are dated discovery/audit records,not freshly
 verified upstream compatibility or instructions to reopen closed experiments.
 
 
-BPFusion's research direction is to reuse upstream model computation and
+bpf-gpu-server's research direction is to reuse upstream model computation and
 measure the Linux TCP/HTTP + eBPF/kernel-to-GPU serving path. Model-specific
 operator tuning is not evidence of an eBPF benefit. A useful comparison keeps
 the backend revision, checkpoint, precision, KV layout and batching behavior
@@ -77,19 +77,19 @@ run. A later native qualification is recorded separately in
   pointers and dimensions. MegaModel owns the weights and buffers. Those
   lifetimes must remain valid through inference and final output ownership.
 - from_pretrained() at lines 591-592 rejects attention projection biases.
-  BPFusion's current Qwen2.5 loader explicitly loads those biases. A direct
+  bpf-gpu-server's current Qwen2.5 loader explicitly loads those biases. A direct
   swap of the existing checkpoint into this importer is therefore unsupported;
   changing the model requires its own independent reference.
 - build.toml declares CUDA capabilities through 12.0. Grid sizing queries
   occupancy; the CUDA implementation uses a software global barrier between
-  phases. BPFusion's existing eight independent graph banks must not simply
+  phases. bpf-gpu-server's existing eight independent graph banks must not simply
   be assumed safe or equivalent for this full-grid kernel. Concurrent launch
   residency and the alternative tensor-batched path need qualification.
 - generate_batch() performs per-sequence prefill, reads first tokens on the
   host and then launches a batched decode. Its existence is not proof of
   GPU-only online batching or request admission.
 - Output tokens are written into device buffers. The existing Python API
-  transfers the result back to the host. It does not publish BPFusion's
+  transfers the result back to the host. It does not publish bpf-gpu-server's
   system-scope produced/DONE fields or implement TCP streaming/reclamation.
 - In tests/test_mak.py, test_additional_model_coverage() for Qwen3/TinyLlama
   permits at least 85% argmax agreement across 48 fixed-history positions
@@ -101,7 +101,7 @@ run. A later native qualification is recorded separately in
 
 The current card is narrower than parts of the source: the importer includes
 additional architecture/RoPE handling. Source presence alone is not measured
-support, so that extra breadth is not promoted to a BPFusion coverage claim.
+support, so that extra breadth is not promoted to a bpf-gpu-server coverage claim.
 
 ### Mirage / MPK
 
@@ -184,9 +184,9 @@ cost with explicit attribution and report shared-GPU conditions.
 [Blink](https://arxiv.org/abs/2604.07609) already removes the steady host CPU
 from serving by combining a SmartNIC/RDMA request path with GPU-resident
 scheduling, batching and KV management. "First CPU-free LLM serving" is not a
-defensible BPFusion novelty claim from the current evidence.
+defensible bpf-gpu-server novelty claim from the current evidence.
 
-BPFusion's candidate distinction is ordinary Linux TCP/HTTP plus
+bpf-gpu-server's candidate distinction is ordinary Linux TCP/HTTP plus
 eBPF/sockmap and a kernel/GPU shared queue, with the existing Linux networking
 and asynchronous kernel TX semantics. Kernel networking, eBPF and kernel TX
 still use CPU. Removing the userspace request worker is not removing all host
@@ -345,7 +345,7 @@ installed or run in this search.
   It maps descriptors/doorbells using driver changes and GPU P2P.
   This is a packet-I/O precedent, not evidence of Linux TCP/HTTP compatibility
   or a complete LLM serving backend. An ordinary Ethernet NIC alone cannot
-  distinguish BPFusion.
+  distinguish bpf-gpu-server.
 - [Paella's SOSP2023 artifact](https://github.com/eniac/paella/blob/master/sosp23_artifact/README.md)
   supplies public model-serving traces and direct-CUDA/Triton comparisons.
   It represents sophisticated userspace/software GPU scheduling. It is an
@@ -538,11 +538,11 @@ adaptation; SM120 and complete-model correctness remain unqualified.
 [CUDA PDL reconstruction](https://github.com/tie-pilot-qxw/pdl-megakernel-reconstruction)
 is a useful alternative-mechanism reference: its authors report97.4% of
 matched persistent-megakernel throughput with an81-kernel graph, on H100
-for Llama3.2-1B at batch1/P32/D128. This is their result, not a BPFusion
+for Llama3.2-1B at batch1/P32/D128. This is their result, not a bpf-gpu-server
 measurement. The
 [experiment guide](https://github.com/tie-pilot-qxw/pdl-megakernel-reconstruction/blob/main/experiments/pdl-reconstruction/README.md)
 explicitly permits free-running trajectory token mismatches and uses
-fixed-position checks; that does not satisfy BPFusion's unchanged strict
+fixed-position checks; that does not satisfy bpf-gpu-server's unchanged strict
 greedy-token oracle. It supplies neither ordinary-Linux network ingress nor
 resident online admission. CUDA PDL overlaps dependent kernel execution;
 it does not itself remove host graph submission.
@@ -583,12 +583,12 @@ to the streaming setting.
 [BatchTokenIDOutput](https://github.com/sgl-project/sglang/blob/v0.5.21/python/sglang/srt/managers/io_struct.py#L1526)
 explicitly identifies its output_ids path with skip_tokenizer_init.
 This makes the official native HTTP API a stronger candidate than an
-in-process eager-loop proxy. It still uses JSON/SSE rather than BPFusion's
+in-process eager-loop proxy. It still uses JSON/SSE rather than bpf-gpu-server's
 binary body, so protocol/framing and model-computation differences need
 explicit interpretation, independent output checking and native baseline
 engagement before any numerical claim.
 
-The owning BPFusion environment has neither SGLang nor vLLM installed.
+The owning bpf-gpu-server environment has neither SGLang nor vLLM installed.
 The2026-10-11 release/PyPI read identifies SGLang0.5.21; its
 [package metadata](https://pypi.org/pypi/sglang/0.5.21/json)
 requires Torch2.13.0, whereas this Workspace has Torch2.14.1.
@@ -613,7 +613,7 @@ precedents rather than another obligation to install model kernels.
   At [revision10a6da3](https://github.com/ut-osa/gpunet/tree/10a6da3b4bbfced885272c535ba661301f49a551),
   core/hostloop.cpp calls CPU recv/send at lines673/839 and performs
   CUDA staging copies on its TCP branch. GPU socket APIs alone therefore
-  cannot distinguish BPFusion; eliminating this steady userspace proxy while
+  cannot distinguish bpf-gpu-server; eliminating this steady userspace proxy while
   keeping Linux transport is the relevant integration question.
 - [GLoop's public artifact](https://github.com/CPFL/gloop/tree/25557429de5283a1803f201d8d054ffe5fc26109)
   cites its SoCC2017 publication. Its [earlier author paper](https://www.cs.utexas.edu/~mars2016/workshop-program/MaRS_2016_paper_6.pdf),
@@ -648,7 +648,7 @@ precedents rather than another obligation to install model kernels.
 - [Raising the Bar for Using GPUs in Software Packet Processing, NSDI2015](https://www.usenix.org/conference/nsdi15/technical-sessions/presentation/kalia)
   finds that suitably optimized CPU implementations can be more resource
   efficient than GPU versions of packet-processing work. It does not settle
-  BPFusion inference, but strengthens the requirement for an efficient CPU
+  bpf-gpu-server inference, but strengthens the requirement for an efficient CPU
   control instead of a busy-loop-only comparison.
 
 The GPUOS source/paper inspected in this branch is the same pinned revision
@@ -721,7 +721,7 @@ GPU-side task queues and CPU-free serving already have prior work. The
 candidate distinction remains correct Linux TCP/HTTP + eBPF/kernel/GPU
 integration that eliminates a steady userspace request/control worker,
 with measured practical value and explicitly attributed remaining CPU cost.
-A compiler's model breadth is not BPFusion's tested model breadth.
+A compiler's model breadth is not bpf-gpu-server's tested model breadth.
 
 Decision implications: retain the currently qualified graph backend for
 matched path comparisons; treat MonoNN/NNFusion as general/non-LLM reuse
@@ -784,7 +784,7 @@ Its custom-EtherType/ConnectX path and dSB workload differ from Linux TCP,
 eBPF parsing and reused LLM graphs. It rules out claiming resident GPU
 request execution, a matched-compute CPU-proxy comparison or removal of a
 dedicated userspace data-path core as first by themselves. The unresolved
-BPFusion claim must identify the Linux/eBPF integration and its demonstrated
+bpf-gpu-server claim must identify the Linux/eBPF integration and its demonstrated
 benefit or portability boundary; current null-inclusive transport results do
 not supply a speedup claim.
 

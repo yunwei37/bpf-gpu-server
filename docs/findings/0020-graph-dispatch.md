@@ -314,7 +314,7 @@ no broad pkill,new Workspace,gateway,Secret,service or persistent setting.
 Original model/oracle/native/test source and unrelated tools/setup_env.sh
 remain unchanged. Plan/independent review and real preflight precede any
 competitive performance claim;baseline execution or numerical failure is
-not a BPFusion win.
+not a bpf-gpu-server win.
 
 Sources:[vLLM0.31 token client](https://github.com/vllm-project/vllm/blob/v0.31.0/examples/scale_out/token_generation_client.py),
 [versioned serving source](https://github.com/vllm-project/vllm/blob/v0.31.0/vllm/entrypoints/scale_out/token_in_token_out/serving.py),

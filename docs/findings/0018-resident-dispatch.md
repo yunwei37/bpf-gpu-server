@@ -252,7 +252,7 @@ control were judged justified; no experiment-control framework is needed.
 The earlier timeout remains unexplained, not repaired by later successes.
 The 64-token numerical failure, GPU text processing, batching, completion
 interfaces/measurements, complete CPU accounting, optimized serving baselines
-and real-NIC controls remain open. This experiment does not complete BPFusion.
+and real-NIC controls remain open. This experiment does not complete bpf-gpu-server.
 
 ## Matched transport follow-up: plan
 
@@ -273,7 +273,7 @@ for host-minus-resident supports only this transport/dispatch boundary; a
 negative interval contradicts that prediction for the cell; crossing zero
 remains inconclusive. These outcomes determine whether the earlier transport
 masking explanation plausibly changes the local dispatch result, not whether
-BPFusion is a competitive service. Comparing this run against the older default
+bpf-gpu-server is a competitive service. Comparing this run against the older default
 run is descriptive: transport settings are not randomized factorial blocks
 and their numerical difference is not a causal transport effect estimate.
 

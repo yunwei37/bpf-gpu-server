@@ -40,7 +40,7 @@ PYTHONPATH=executor python3 tests/kernel_tx.py
 PYTHONPATH=executor python3 tests/qwen_kernel_tx.py
 ```
 
-Root privileges are needed. These tests own the BPFusion tc hook in their
+Root privileges are needed. These tests own the bpf-gpu-server tc hook in their
 network namespace, start only their own executor, unload their test module and
 detach on exit. The protocol test's finit_module syscall is for Linux x86-64.
 For a manual host-driven Qwen control: attach as usual, run

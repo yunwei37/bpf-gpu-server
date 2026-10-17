@@ -44,10 +44,10 @@ rate change.
   dominated by Python's per-token interpreter loop + tensor glue, not by the
   page handoff: the page write is 2 `packed_into` (a few dozen instructions) and
   the poll between requests is a handful of loads. So the ~40 M/token is a
-  **host-Python tax**, not a BPFusion tax — but it is the honest cost of the
+  **host-Python tax**, not a bpf-gpu-server tax — but it is the honest cost of the
   current implementation and the reason the bpfusion path (`0005`) is +0.7 ms
   TTFT over direct: both sit on the same Python decode.
-- **Claim boundary:** this is *not* "BPFusion costs 40 M instructions/token".
+- **Claim boundary:** this is *not* "bpf-gpu-server costs 40 M instructions/token".
   It is "the current host-Python executor costs ~40 M instructions/token,
   measured, with the page path included". The page path alone (one
   `sendto`-equivalent ingress parse + a sub-µs handoff, `0003`/`0004`) is a

@@ -77,11 +77,11 @@ records the unchanged host boot and an external co-tenant transition.
 SGLang PID2762187/18368MiB exists at10:27:34UTC. The separate
 gpu-smt-candidate-5090-20261007 Job terminates at10:34:41UTC with exit1;
 its log reports ENOSPC while appending generation-events.jsonl, after157/186
-tasks. Subsequent host reads find no SGLang process. BPFusion's own32GiB
+tasks. Subsequent host reads find no SGLang process. bpf-gpu-server's own32GiB
 Longhorn volume has16GiB available; host overlay has346GiB available.
 These reads do not identify the cause of the other project's storage growth.
 
-BPFusion did not stop/restart that Job/SGLang or change its PVC/lifecycle.
+bpf-gpu-server did not stop/restart that Job/SGLang or change its PVC/lifecycle.
 The event occurs during strict qualification, before all preflight measured
 cells and full collection. Old shared-SGLang performance results are not a
 matched comparison for this host condition. No induced isolation or
@@ -149,7 +149,7 @@ and crossing-zero client intervals. No invalidating defect or rerun is required.
 
 The full collection starts with a new shared SGLang process observed at
 10:51:29UTC,PID4026103,18398MiB, on the same GPU UUID and host boot.
-At10:56:58 and11:14:58UTC it remains observed alongside BPFusion.
+At10:56:58 and11:14:58UTC it remains observed alongside bpf-gpu-server.
 Per-cell GPU clocks/temperature/power/utilization are retained; these do
 not identify or guarantee constant co-tenant activity.
 
@@ -164,7 +164,7 @@ The after-run process/GPU inspection occurs later, at21:51UTC. It finds no
 benchmark/executor process, bfusion module or pinned BPF object, the same host
 boot and an idle GPU. SGLang is then absent. This delayed observation does
 not establish when SGLang left, continuous residency, or contemporaneous
-after-run GPU conditions; its lifecycle was not changed by BPFusion.
+after-run GPU conditions; its lifecycle was not changed by bpf-gpu-server.
 Do not transfer earlier co-tenant conditions into a claim of isolated data.
 
 ### Decision and remaining scope

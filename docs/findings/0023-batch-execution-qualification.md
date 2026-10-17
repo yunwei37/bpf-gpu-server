@@ -166,7 +166,7 @@ CPU saving, total host/kernel cost or energy efficiency.
 [Host residency snapshots](../../bench/results/queue_banks_environment_20261010.txt)
 record a separate SGLang scheduler with18,402MiB GPU memory before, during and
 after this run. The active-run snapshot also attributes python processes with
-13,038MiB and652MiB to this BPFusion container; total GPU memory is32,127MiB.
+13,038MiB and652MiB to this bpf-gpu-server container; total GPU memory is32,127MiB.
 This is a coarse residency observation, not a measured peak, an isolated
 allocation delta, or a before/after serial-versus-bank memory comparison. The
 larger graph footprint is a practical concern on this32GiB device. No other
@@ -232,7 +232,7 @@ Repeating closed KV/dispatch/fusion comparisons would not resolve it.
 
 Scope: only temporary instrumentation and its necessary record; production
 source/native/module/queue/protocol/oracle and other workloads remain unchanged.
-All execution occurs in the original BPFusion Workspace on current main
+All execution occurs in the original bpf-gpu-server Workspace on current main
 fc58faa285c7d169733fe626c0c4ddef288d3cb8. The temporary adapter
 /tmp/bpfusion-qwen-pointwise-5mxeys8g/device_trace_preflight/qwen_graph
 is the exact retained source plus32 instrumentation lines, using the existing
@@ -474,7 +474,7 @@ CUDA records. Attribute only associations observed in this eager forward.
 Do not infer captured/device-launched ownership from a host association or
 declare bandwidth saturation from names/durations.
 
-All work uses main8a83c63 in the existing BPFusion Workspace. Production,
+All work uses main8a83c63 in the existing bpf-gpu-server Workspace. Production,
 native/module/queue/oracle/transport and other GPU owners remain unchanged.
 The temporary script reuses current qwen_graph.py load/capture logic, cuts
 off before native serve, and captures one private bank. It then adds Linear

@@ -18,7 +18,7 @@ comparison. It invents no formal paper RQ or determinism technique.
 
 Finding0058 exposed the finite reference-pool boundary of ordinary default-mode
 runs. Here each expected sequence comes from official CPU-scheduled LLM.generate
-before observing BPFusion. Enable only upstream VLLM_BATCH_INVARIANT=1 in a private
+before observing bpf-gpu-server. Enable only upstream VLLM_BATCH_INVARIANT=1 in a private
 test environment. This selects upstream operation/environment behavior; it changes
 the compute mode from earlier default-mode results. Loop and efficient timed-epoll
 native TCP share that same mode, graphs, weights, precision and existing timer.
@@ -101,7 +101,7 @@ Use this evidence for the finite same-mode fidelity and transport comparison.
 It does not explain0058's output failure or qualify default-mode ordinary
 trajectories, eager-HF parity, arbitrary models/backends, text/OpenAI APIs,
 total CPU/energy, production p99 or continuous host isolation. Upstream mode
-is reused functionality, not BPFusion novelty. No speedup or default promotion
+is reused functionality, not bpf-gpu-server novelty. No speedup or default promotion
 follows; the original source remains selected.
 
 Pinned private runtime is vLLM0.31.0, Torch2.13.0+cu129, Transformers5.17.0,

@@ -130,7 +130,7 @@ boundary evidence; it does not turn qualification counts into paper novelty.
 During the first separate-Qwen bootstrap/preflight window lab becomes NotReady
 and Tailscale/campus SSH time out. Existing Cloudflare SSH remains usable; the
 same boot returns Ready automatically. Global OOM kills other Lean/Coder
-processes and iSCSI/EXT4 errors occur on other devices. Original BPFusion Pod,
+processes and iSCSI/EXT4 errors occur on other devices. Original bpf-gpu-server Pod,
 Coder processes and pipeline stay live; no replacement/restart/host mutation
 occurs. Preserve this unequal setup exposure; do not claim host isolation.
 

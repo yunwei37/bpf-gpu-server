@@ -1,4 +1,6 @@
-# BPFusion
+# bpf-gpu-server
+
+原名 BPFusion。
 
 Experimental serving transport over ordinary Linux TCP, with eBPF admission
 and caller-supplied GPU execution. Userspace initializes the service; the
@@ -166,7 +168,7 @@ Userspace CPU falls while system CPU offsets it; whole-host savings remain
 unestablished. Full tails, observer cost, client timing faults and actual
 cleanup are explicit in the report.
 
-The bounded performance search is closed. BPFusion remains an OSS research
+The bounded performance search is closed. bpf-gpu-server remains an OSS research
 prototype for the qualified transport/graph boundary, with no general speed,
 total-CPU or stable arbitrary-kernel-plugin claim.
 [Daily progress and decisions](docs/progress.md) retain repository upkeep and

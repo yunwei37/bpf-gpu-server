@@ -3,7 +3,7 @@
 Status: measured on 2026-10-08, same host as `bench/results/HOST.md`.
 Raw log: `bench/results/llm_20261008T055510Z.txt`.
 
-This is the first **real model** on the BPFusion path from the goal
+This is the first **real model** on the bpf-gpu-server path from the goal
 (Qwen 0.6B/1.7B or a tiny MLP). The MLP path in `0004` proved the queue
 mechanics; this proves the request and generated tokens travel through the
 kernel→page path with a transformer.

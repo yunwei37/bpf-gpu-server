@@ -1,6 +1,6 @@
-# BPFusion architecture
+# bpf-gpu-server architecture
 
-BPFusion separates Linux request/reply ownership from GPU computation.
+bpf-gpu-server separates Linux request/reply ownership from GPU computation.
 Userspace creates sockets, maps queues and captures caller graphs at startup.
 The experimental kernel-network path then advances TCP and queue lifetimes
 in BPF while a resident GPU dispatcher launches existing device graphs.

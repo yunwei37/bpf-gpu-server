@@ -59,7 +59,7 @@ PYTHONPATH=executor python3 tools/llm_load.py --levels "1 2 4 8" --rounds 2 --ge
 
 ## What this implies for the goal
 
-The BPFusion claim is about the **queue path**, not the model server. This
+The bpf-gpu-server claim is about the **queue path**, not the model server. This
 measurement quantifies how much headroom the queue path leaves for a real
 server: at 119 tok/s decode the ~0.7 ms queue increment (`0005`) is 8 % of one
 token of latency, and the page round trip (<100 µs, `0003`/`0004`) is ~1 % — so

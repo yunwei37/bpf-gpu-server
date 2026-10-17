@@ -134,7 +134,7 @@ launch1/error0 per executor, kernel busy0/reserved0/eightFREE and cleanup.
 These establish executability only.
 
 The entire repaired-source matrix subsequently completed from frozen
-[cc07226](https://github.com/yunwei37/BPFusion/commit/cc07226eb9680c90134279bce0d58fc0b730280e).
+[cc07226](https://github.com/yunwei37/bpf-gpu-server/commit/cc07226eb9680c90134279bce0d58fc0b730280e).
 [Full native stdout](../../bench/results/coalesced_network_retry1_20261011.stdout.txt)
 retains commands, before-host observations and terminal status:
 Smol exited0 at09:28:06 UTC; Qwen exited0 at09:42:08 UTC. Raw outputs are
@@ -184,7 +184,7 @@ That cell delivers295.105 TPS and247.94 s global CPU work, versus
 cell runs09:39:02.903-09:39:08.992 UTC, about80 s later, without the same
 recorded event. This is a concrete unequal-exposure confound, not evidence of
 kernel robustness or a transport-only throughput gain. Neither the cause of
-host memory pressure nor BPFusion responsibility is established. Logs do not
+host memory pressure nor bpf-gpu-server responsibility is established. Logs do not
 quantify how much delay came from client scheduling, the reactor or GPU work.
 
 All blocks remain in the reported estimates. No outlier was removed and no

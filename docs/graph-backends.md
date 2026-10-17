@@ -1,6 +1,6 @@
 # Supplying a captured CUDA graph
 
-BPFusion now has an experimental one-shot graph adapter independent of LLM
+bpf-gpu-server now has an experimental one-shot graph adapter independent of LLM
 model metadata. A caller supplies one CUDA graph and device input/output buffer
 per slot. The server copies opaque32-bit words from the existing shared queue,
 launches the graph on the GPU, waits for its child work, publishes output and

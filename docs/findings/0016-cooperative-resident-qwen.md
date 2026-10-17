@@ -1,6 +1,6 @@
 # 0016: cooperative resident Qwen and the longer-decode accuracy boundary
 
-Observed 2026-10-10 UTC in the existing BPFusion Workspace, RTX 5090,
+Observed 2026-10-10 UTC in the existing bpf-gpu-server Workspace, RTX 5090,
 CUDA 13, Linux 7.3-rc3, Qwen2.5-0.5B-Instruct, eager HF fp16 oracle.
 
 ## Initial scalar grid: one launch

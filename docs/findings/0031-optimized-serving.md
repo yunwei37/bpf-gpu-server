@@ -1,6 +1,6 @@
 # Official optimized serving comparison
 
-On this finite Qwen2.5-0.5B token-ID workload, the current BPFusion frontend
+On this finite Qwen2.5-0.5B token-ID workload, the current bpf-gpu-server frontend
 has lower first-token latency, while official optimized vLLM has substantially
 higher eight-client long-output throughput. This completed comparison bounds
 the current implementation and selects the next compute-reuse work. Different
@@ -25,12 +25,12 @@ The detached collection wrapper's own wait status was not retained.
 
 The strongest external competitor is official vLLM 0.31.0 with its default
 optimized scheduler/kernels/caches/graphs, token-only HTTP and FP16 weights.
-Its temporary environment uses Torch 2.13.0+cu129/Transformers 5.17.0; BPFusion
+Its temporary environment uses Torch 2.13.0+cu129/Transformers 5.17.0; bpf-gpu-server
 retains Torch 2.14.1+cu130/Transformers 5.19.0. Actual safetensors/export comparison
 covers 290 parameters / 494032768 FP16 elements, bit-identical for the frozen
 checkpoint 7ae557604adf67be50417f59c2c2f167def9a775.
 
-BPFusion reuses eight independent HF graph/KV banks and binary-token HTTP
+bpf-gpu-server reuses eight independent HF graph/KV banks and binary-token HTTP
 responses. vLLM uses its compiled model/attention/batching and JSON/SSE token-ID
 responses. These are different complete implementations, not a same-backend
 control-path ablation. Token IDs are counted, not text chunks or SSE frames.
@@ -45,11 +45,11 @@ No utilization override or eager fallback is used.
 
 ## Client results
 
-Means are arithmetic means of five process-block means. Gain is BPFusion-minus-
-vLLM for throughput, and vLLM-minus-BPFusion for latency. Intervals are separate
+Means are arithmetic means of five process-block means. Gain is bpf-gpu-server-minus-
+vLLM for throughput, and vLLM-minus-bpf-gpu-server for latency. Intervals are separate
 nominal paired two-sided t95 with df4, without multiplicity adjustment.
 
-| gen64 primary metric | Clients | BPFusion | vLLM | Gain | Nominal t95 gain |
+| gen64 primary metric | Clients | bpf-gpu-server | vLLM | Gain | Nominal t95 gain |
 |---|---:|---:|---:|---:|---|
 | Output tokens/s | 1 | 566.153 | 536.485 | +29.667 | [12.636,46.699] |
 | TTFT, ms | 1 | 2.184801 | 8.953710 | +6.768909 | [5.644424,7.893394] |
@@ -70,7 +70,7 @@ batching/compute; the comparison does not isolate batching as the sole cause.
 
 ## Output agreement and baseline engagement
 
-All 1280 BPFusion measured sequences equal the independent frozen eager HF
+All 1280 bpf-gpu-server measured sequences equal the independent frozen eager HF
 reference. vLLM matches 838/1280 full sequences:320/320 at gen1/c1,80/320 at
 gen64/c1,277/320 at gen1/c8 and161/320 at gen64/c8. Every returned vocabulary
 ID, requested length, prompt identity and stream completion is retained.
@@ -86,15 +86,15 @@ All five vLLM logs engage FlashAttention2, VLLM_COMPILE and FULL_AND_PIECEWISE
 CUDA graphs. Chunked prefill and prefix caching remain enabled; printed prefix
 hit rate is0%. The actual async-scheduling selection is not established here.
 There is no deliberately serial, slow-Python or eager-only competitor.
-BPFusion final logs each show one host launch, 8580 device model launches,
+bpf-gpu-server final logs each show one host launch, 8580 device model launches,
 graph_error=0, eight banks and max_active=8.
 
 ## Costs, shutdown and scope
 
 All 50 active/idle CPU read brackets reconstruct at 100 Hz. For gen64/c8,
-owned process-group CPU averages 62.5 us/request for BPFusion and 15531.25 us/request
+owned process-group CPU averages 62.5 us/request for bpf-gpu-server and 15531.25 us/request
 for vLLM. The sum excludes kernel TCP TX, RX/softirq/BPF, driver, client and
-other host work. BPFusion's zero accounting ticks in some cells do not mean
+other host work. bpf-gpu-server's zero accounting ticks in some cells do not mean
 zero work. These values cannot establish total service CPU/energy savings.
 The planned descriptive p50/p99 and warm-start/idle metrics are in the
 secondary analysis; pooled finite-request percentiles are not a production
@@ -105,11 +105,11 @@ the already-installed ninja executable. Exposing the existing venv/bin only
 to the vLLM child repairs its normal launch environment. Attempt2 completes
 eight cells/64 measured requests/2080 measured tokens, plus 520 warmup tokens.
 The historical plan review's1040-total/780-graph numbers are arithmetic errors:
-1040 measured tokens belong to each method, and BPFusion launches1300 model
+1040 measured tokens belong to each method, and bpf-gpu-server launches1300 model
 graphs. Full collection uses the same corrected path and unchanged workload.
 
 Shutdown logs matter: official vLLM force-kills remaining EngineCore children;
-BPFusion records Torch SubprocPool unclean-exit warnings. Parent wait codes0
+bpf-gpu-server records Torch SubprocPool unclean-exit warnings. Parent wait codes0
 do not prove all child exits were graceful or zero. The adapter's own timeout
 SIGKILL path is not observed. Original groups are cleared; no requests are
 discarded by these after-collection shutdowns.
