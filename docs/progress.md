@@ -296,3 +296,36 @@ times and foreign setup_env.sh remain. After byte-comparing copied raw clients
 and figures, this run’s temporary builds/caches/plotting environment are removed.
 No paper or existing archived data file changes. The requested rename is complete;
 final commit/push and public-file verification seal delivery, not a new speed claim.
+
+## 2026-10-18 Los Angeles: daily upkeep
+
+The completed five-block capacity comparison and bounded graph confirmation
+remain sealed; there is no paused experiment to resume and no new performance
+hypothesis supported by today's repository state. The remaining blocker for
+wider reuse is the qualified kernel/library/GPU stack and experimental graph
+interface, not an unmeasured positive eBPF result. The most promising available
+step is improving the actual reproduction entry: put the project description
+before the long migration table and link the current, post-rename verification
+alongside the historical onboarding receipt. Preserve the table verbatim under
+a linked Name migration section, retain all experiment evidence, and leave
+serving defaults and paper files unchanged. Verify paragraph preservation,
+relative links/fragments, documented shell syntax and public entry URLs, then
+commit/push the upkeep. A new GPU run would repeat already-passing rename checks
+without resolving the compatibility boundary, so none is started.
+
+Live observation:main matches origin at7cb946dc before edits, the original
+Workspace Pod/PVC and PID1/10909 start times are retained, GPU applications/BPF
+pins and this task's old temporary build directories are absent. The root
+directory has no new tracked scratch/build files; ignored build/ and foreign
+tools/setup_env.sh remain in place. No obsolete historical evidence is deleted.
+
+Verification completes:976relative paths/fragments resolve and22documented
+shell blocks are byte-identical to the prior README/runbooks and pass bash
+syntax checks. The migration block is preserved verbatim; reversing only this
+move and the added links reproduces the prior README exactly. GitHub responds
+HTTP200. Workspace HTTP clients receive Cloudflare403/error1010 for both blog
+URLs, while ordinary in-app browser navigation displays the English and Chinese
+article titles/content at those same URLs; these are not broken links. No
+challenge, site setting or blog content is changed, and the temporary tab closes.
+This daily change is documentation-only: no GPU experiment, dependency install,
+runtime/configuration change, paper edit or historical-data rewrite.

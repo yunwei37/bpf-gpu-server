@@ -8,7 +8,7 @@ It does not edit paper prose/PDF. Paths are relative to the
 source root; programs locate that root from their own file, so the directory
 and remote repository may be renamed.
 
-Current source/command names follow the [rename mapping](README.md). Archived
+Current source/command names follow the [rename mapping](README.md#name-migration). Archived
 raw filenames, embedded source snapshots and historical finding commands retain
 their original names. The offline replay uses those files directly; do not
 rename archived inputs or substitute renamed source into a historical run.

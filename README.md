@@ -2,27 +2,7 @@
 
 原名 BPFusion。
 
-BGS_/bgs_ abbreviate bpf-gpu-server and keep BPF object names short.
-The project now uses the following source and command names. Archived raw data
-and historical findings keep their original commands so their records remain
-replayable; they describe the same project under its former name.
-
-| Historical name | Current name |
-|---|---|
-| bpfusion_load | bpf_gpu_server_load |
-| fusion.bpf.c / fusion.bpf.o | server.bpf.c / server.bpf.o |
-| bpfusion_queue.h / bpfusion_admission.h | bpf_gpu_server_queue.h / bpf_gpu_server_admission.h |
-| bfusion_tx.ko | bpf_gpu_server_tx.ko (legacy transport) |
-| BF_* macros and environment variables; bf_* symbols | BGS_*; bgs_* |
-| /sys/fs/bpf/bpfusion_* pins | /sys/fs/bpf/bgs_* pins |
-| bfns1/bfns2 and bfv0/bfv1 in the veth example | bgsns1/bgsns2 and bgsv0/bgsv1 |
-
-Rebuild the loader, BPF objects, executor and any caller of the graph C API
-together. Stop and detach an old instance with its own loader before switching;
-old/new pin names and graph exports are not aliases. Wire framing and shared
-page layout are unchanged. Existing Workspace and automation identities are
-operational records and are not renamed by this source change.
-
+See [name migration](#name-migration) for historical source and command names.
 
 Experimental serving transport over ordinary Linux TCP, with eBPF admission
 and caller-supplied GPU execution. Userspace initializes the service; the
@@ -82,7 +62,9 @@ For LLM generation, the separate
 build, start, client, native comparison and cleanup. It uses the explicit
 module-free vLLM target; the legacy module transport remains separate.
 [Fresh-environment validation](bench/results/onboarding_20261016/) passes both
-models/transports with real HTTP/TCP requests.
+models/transports with real HTTP/TCP requests. The
+[post-rename validation](bench/results/rename_20261017/) records ordinary builds,
+both models, cuBLAS/cuFFT and offline paper replay with the current names.
 
 Tested stack:Linux 7.3-rc3, x86-64, RTX 5090(sm_120), CUDA toolkit 13.0,
 Python 3.12 and the [pinned Python environment](requirements.txt). Ordinary builds
@@ -237,6 +219,29 @@ remain controls with their own evidence. Older bench/run_* scripts manage
 hooks/pins and may terminate matching executors; read their lifecycle before
 running alongside another service. The current walkthrough uses explicit
 process and cleanup steps.
+
+## Name migration
+
+BGS_/bgs_ abbreviate bpf-gpu-server and keep BPF object names short.
+The project now uses the following source and command names. Archived raw data
+and historical findings keep their original commands so their records remain
+replayable; they describe the same project under its former name.
+
+| Historical name | Current name |
+|---|---|
+| bpfusion_load | bpf_gpu_server_load |
+| fusion.bpf.c / fusion.bpf.o | server.bpf.c / server.bpf.o |
+| bpfusion_queue.h / bpfusion_admission.h | bpf_gpu_server_queue.h / bpf_gpu_server_admission.h |
+| bfusion_tx.ko | bpf_gpu_server_tx.ko (legacy transport) |
+| BF_* macros and environment variables; bf_* symbols | BGS_*; bgs_* |
+| /sys/fs/bpf/bpfusion_* pins | /sys/fs/bpf/bgs_* pins |
+| bfns1/bfns2 and bfv0/bfv1 in the veth example | bgsns1/bgsns2 and bgsv0/bgsv1 |
+
+Rebuild the loader, BPF objects, executor and any caller of the graph C API
+together. Stop and detach an old instance with its own loader before switching;
+old/new pin names and graph exports are not aliases. Wire framing and shared
+page layout are unchanged. Existing Workspace and automation identities are
+operational records and are not renamed by this source change.
 
 ## Contributing
 
