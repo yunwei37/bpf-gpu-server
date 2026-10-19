@@ -286,7 +286,11 @@ python3 bench/smoke_paper_llm.py --model ../models/qwen --output ../llm-smoke
 ~~~
 
 Run this in a separate new inference environment,with CUDA/library paths set
-as above. Allow2–10min for fresh graph capture and official compilation.
+as above. The local model directory may have any name; the smoke selects the
+unique archived reference set matching config.json’s vocabulary size. Supply
+the pinned checkpoint above; this selection is not a weights/revision check.
+Unknown or ambiguous reference sets are rejected before a build or GPU work.
+Allow2–10min for fresh graph capture and official compilation.
 It checks128 protocol-valid requests/8192 output tokens plus32 warmups;
 finite-reference flags are counted rather than hidden. It is local correctness/
 workload smoke,not the remote performance experiment or universal exact fidelity.

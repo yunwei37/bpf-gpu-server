@@ -29,8 +29,8 @@ def main():
     model_config = json.loads((model / "config.json").read_text())
     candidates = [json.loads(p.read_text()) for p in
                   (ROOT / "bench/results/kernel_network_integration_20261017").glob("*_frozen.json")]
-    candidates = [c for c in candidates if Path(c["model"]).name == model.name
-                  and c["frozen_model"]["vocab"] == model_config["vocab_size"]]
+    candidates = [c for c in candidates
+                  if c["frozen_model"]["vocab"] == model_config["vocab_size"]]
     if len(candidates) != 1:
         ap.error("Need one of the two pinned snapshots; frozen prompt/output references must match the checkpoint")
     cfg = candidates[0]

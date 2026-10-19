@@ -1,0 +1,78 @@
+{
+  "baseline_revision": "c1f285fb",
+  "scope": "Argument/configuration preflight only. Runs the actual main() with real pinned model configs; replaces only the first subprocess.run (Make) with a boundary exception, before builds, GPU calls or inference. Negative unknown/duplicate inputs are deliberate fixtures.",
+  "before": [
+    {
+      "model": "qwen",
+      "directory": "qwen",
+      "exit": 2,
+      "stage": "argument validation",
+      "error": "usage: smoke_paper_llm.py [-h] --model MODEL --output OUTPUT\nsmoke_paper_llm.py: error: Need one of the two pinned snapshots; frozen prompt/output references must match the checkpoint"
+    },
+    {
+      "model": "smol",
+      "directory": "smol",
+      "exit": 2,
+      "stage": "argument validation",
+      "error": "usage: smoke_paper_llm.py [-h] --model MODEL --output OUTPUT\nsmoke_paper_llm.py: error: Need one of the two pinned snapshots; frozen prompt/output references must match the checkpoint"
+    }
+  ],
+  "after": [
+    {
+      "case": "qwen-original",
+      "outcome": "correct reference selected; reached first Make invocation",
+      "gpu_or_server_started": false,
+      "private_test_key_left": false
+    },
+    {
+      "case": "qwen-renamed",
+      "outcome": "correct reference selected; reached first Make invocation",
+      "gpu_or_server_started": false,
+      "private_test_key_left": false
+    },
+    {
+      "case": "smol-original",
+      "outcome": "correct reference selected; reached first Make invocation",
+      "gpu_or_server_started": false,
+      "private_test_key_left": false
+    },
+    {
+      "case": "smol-renamed",
+      "outcome": "correct reference selected; reached first Make invocation",
+      "gpu_or_server_started": false,
+      "private_test_key_left": false
+    },
+    {
+      "case": "unknown-vocabulary",
+      "outcome": "rejected before build",
+      "exit": 2,
+      "gpu_or_server_started": false,
+      "private_test_key_left": false
+    },
+    {
+      "case": "ambiguous-reference",
+      "outcome": "rejected before build",
+      "exit": 2,
+      "gpu_or_server_started": false,
+      "private_test_key_left": false
+    }
+  ],
+  "checks_passed": 6,
+  "model_configs_source": "Both real config.json files at checkpoint paths recorded in bench/results/kernel_network_integration_20261017/{qwen,smol}_frozen.json; renamed tests copy config bytes without weights.",
+  "reference_selection": "The output config.json prompts and entire frozen_model object equal the expected committed reference set.",
+  "not_claimed": "No new GPU/model-output/performance/offline-paper replay run. No weights/revision-integrity check is added.",
+  "new_pod": {
+    "name": "coder-eb48d962-76f4-4ff7-bac5-7bc62ec2ada3-5c8bb655f6-66f4p",
+    "uid": "4c7f336d-0a3c-4c4f-a4ee-c1f8f9ac0861",
+    "created_utc": "2026-10-19T00:47:51Z",
+    "ready": true,
+    "restarts": 0,
+    "original_pvc_uid": "5d1b0ce5-fbee-43ef-93f1-d433037bb5e4",
+    "recreation_cause": "not established; no recovery mutation by this thread"
+  },
+  "review": "This thread only. Two-line predicate replacement removes directory-basename coupling; the unique-candidate guard, pinned-checkpoint contract, warmup/reference criteria, build/GPU/client code and defaults remain unchanged. No new flags, dependencies, compatibility wrapper or maintained test harness.",
+  "relative_links_checked": 977,
+  "link_failures": [],
+  "shell_blocks_syntax_checked": 33,
+  "temporary_fixture_directory_removed": true
+}

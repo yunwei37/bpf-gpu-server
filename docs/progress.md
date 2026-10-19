@@ -329,3 +329,45 @@ article titles/content at those same URLs; these are not broken links. No
 challenge, site setting or blog content is changed, and the temporary tab closes.
 This daily change is documentation-only: no GPU experiment, dependency install,
 runtime/configuration change, paper edit or historical-data rewrite.
+
+## 2026-10-19 Los Angeles: daily upkeep and local model paths
+
+The completed capacity comparison and bounded graph negative exit remain
+closed. Wider kernel/GPU compatibility is still unqualified; repeating the
+closed speed experiment would not address it. The most promising available
+progress is removing an actual reproduction obstacle: the LLM smoke compared
+the local directory basename with an archived HF snapshot ID, so an ordinary
+export at the documented ../models/qwen path was rejected despite having the
+right model configuration. Remove only that basename predicate, select the
+unique frozen reference set by its vocabulary size, and keep the pinned-model
+contract explicit. This is reference selection, not weights/revision
+verification. Verify renamed/original Qwen and Smol paths plus unknown and
+ambiguous sets before any build/GPU work, then check docs and publish.
+
+Actual preflight reproduction confirms both renamed real-config directories
+fail on c1f285fb before a build. After the change, both original checkpoint
+paths and both renamed copies select the complete correct reference object
+and reach the first Make invocation; unknown-vocabulary and duplicate-reference
+fixtures still reject. The check runs the actual main() and deliberately stops
+at that subprocess boundary; it does not build, load weights, serve requests or
+measure performance. All six checks pass and leave no private key. The
+[receipt](../bench/results/model_path_20261019.json) records the exact boundary,
+inputs, prior failures and limitations. No permanent test framework is added.
+
+The existing Workspace now has a new Ready Pod (created2026-10-19T00:47:51Z,
+zero container restarts) on the same original Bound PVC/PV. Repository main,
+the retained journal and foreign tools/setup_env.sh remain. Previous process
+IDs and /tmp environments are not assumed to survive this external Pod change;
+the old inference environment is absent. Its recreation cause is not
+established, and this thread performs no recovery/configuration mutation.
+README structure and the directory map remain current; no historical evidence
+or foreign/ignored build file needs deletion. Paper and serving sources remain
+untouched. Today's dependency-free preflight is sufficient for the changed
+selection stage; earlier GPU/paper validation is historical, not claimed rerun.
+
+Final checks:977relative paths/fragments resolve;33documented shell
+blocks and the changed Python source pass syntax checks. Only the smoke
+selection predicate, its artifact explanation and today’s records change.
+Temporary config-only fixtures are removed; foreign setup/build work, existing
+raw results and paper files stay in place. Commit/push and public-byte checks
+complete this concrete onboarding repair, with no new performance claim.
