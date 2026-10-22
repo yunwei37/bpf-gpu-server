@@ -371,3 +371,23 @@ selection predicate, its artifact explanation and today’s records change.
 Temporary config-only fixtures are removed; foreign setup/build work, existing
 raw results and paper files stay in place. Commit/push and public-byte checks
 complete this concrete onboarding repair, with no new performance claim.
+
+## 2026-10-21 Los Angeles: daily upkeep
+
+The remaining reuse boundary is unqualified kernel/GPU compatibility; no new
+fault or case is present that would justify reopening the sealed capacity or
+bounded graph experiments. The most promising available action is preserving
+a usable reproduction entry: check current source/receipts, links and documented
+commands before changing anything. This inspection finds main atd0267a66
+synchronized with origin,977relative links/fragments valid and33shell blocks
+syntactically valid. Public README, ARTIFACT, LLM smoke source and the October19
+receipt returnHTTP200 and match Workspace bytes. README/directory organization
+is current; no tracked root scratch path or obsolete owned file needs removal.
+The same Ready Workspace Pod has zero restarts and its existing claim/journal;
+no project smoke/replay/server/client process, GPU application, project BPF pin
+or old task-owned temporary directory is found, so no run needs resuming.
+Foreign setup_env.sh, ignored build/, paper and historical evidence remain.
+Substantive future work needs a concrete compatibility failure or independent
+hypothesis; no such work is invented today. Only this dated record changes.
+No dependency, serving setting or experiment is touched, and earlier functional
+results are not reported as new measurements.
