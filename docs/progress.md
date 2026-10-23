@@ -391,3 +391,24 @@ Substantive future work needs a concrete compatibility failure or independent
 hypothesis; no such work is invented today. Only this dated record changes.
 No dependency, serving setting or experiment is touched, and earlier functional
 results are not reported as new measurements.
+
+## 2026-10-22 Los Angeles: daily upkeep
+
+The remaining boundary is broader kernel/GPU compatibility, with no new
+concrete failure to investigate. The most useful available step is keeping the
+published reproduction entry consistent, verified today by977valid relative
+links/fragments,33shell syntax checks, and public README/ARTIFACT/model-path
+receipt bytes matching main at042b2ec5 (HTTP200). README structure and directory
+map remain current; no owned obsolete/scratch file needs removal. The existing
+Workspace Pod remains Ready with zero restarts and its retained claim/journal;
+no project run, GPU application, project pin or old task-owned temporary
+directory is present. No experiment needs resuming. Preserve foreign setup_env.sh,
+ignored build/, paper and historical evidence; append only this dated record.
+Substantive research progress requires a new independent hypothesis or real
+portability case, rather than repeating the sealed capacity/graph experiments.
+No code, dependency, service setting or performance result changes today.
+
+One commit request encounters a Kubernetes API TLS-handshake timeout before
+Workspace execution. A fresh existing-path exec immediately succeeds; HEAD and
+dirty status confirm no commit occurred. Retry only that unexecuted request;
+no host, Pod, credential or configuration mutation is needed. Cause is unknown.
