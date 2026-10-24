@@ -428,3 +428,23 @@ run, GPU application, project pin or task-owned temporary residue needs resuming
 or cleanup. Foreign setup_env.sh, ignored build/, paper and historical evidence
 are preserved. Only this daily reflection/inspection record is appended;
 no code, dependency, runtime or experiment is changed.
+
+
+### October23 follow-up: plotting dependency alert and repair
+
+The upkeep push then reports a new concrete blocker: nine GitHub advisories
+(one critical, six high, two medium), all on Pillow12.3.0 in the archived
+October16 plotting freeze. The promising safe action is to pin patched
+Pillow13.0.0 in the active artifact requirements, preserve the historical
+manifest, and validate the entire offline numerical/figure path in a fresh
+plotting environment. This avoids changing the inference runtime or rerunning
+closed experiments. The [receipt](../bench/results/pillow_replay_20261023/README.md)
+records136PASS/0MISMATCH/0PAPER_CHANGED in214.839s across7182inputs; figure data
+matches the post-rename result byte for byte, and both regenerated plots pass
+visual inspection. The installed version is outside all nine reported
+vulnerable ranges. The old freeze and its nine open alerts are explicitly
+retained, with no dismissal; no exploitation is inferred. Document the current
+requirements and venv prerequisite. Remove the task-owned temporary environment,
+wheel and caches after saving receipts. Paper, models, foreign setup_env.sh,
+existing build outputs and serving settings remain untouched. This repairs a
+real reproduction dependency issue; it adds no new performance claim.

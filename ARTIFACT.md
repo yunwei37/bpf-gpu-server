@@ -15,7 +15,8 @@ rename archived inputs or substitute renamed source into a historical run.
 
 ## One-command offline replay
 
-Prepare Python3.12 and plotting dependencies once while online:
+Prepare Python3.12 with venv/ensurepip support and plotting dependencies once
+while online:
 
 ~~~sh
 python3 -m venv ../artifact-env
@@ -25,6 +26,14 @@ python3 -m venv ../artifact-env
 If ensurepip is absent, use venv --without-pip and an existing pip's
 --python option to install into the new environment only.
 Tested: Python3.12.3, Matplotlib3.11.2, NumPy2.5.4; no inference packages.
+The current requirements pin Pillow13.0.0. The archived
+[plot environment](bench/results/sustained_remote_resources_20261016/plot_requirements.txt)
+is a historical freeze containing Pillow12.3.0; install the current requirements
+above for replay. Nine GitHub advisories affect that old version, including
+[the JPEG decoder overflow](https://github.com/advisories/GHSA-8g5g-8vmr-9782).
+Historical manifests and measured results are retained unchanged.
+The [Pillow13 replay receipt](bench/results/pillow_replay_20261023/README.md)
+passes all136checks with identical figure data; archived alerts remain open.
 
 From the source root, after dependency installation:
 

@@ -1,3 +1,5 @@
 # Offline data replay/figures only; no CUDA or inference packages.
 matplotlib==3.11.2
 numpy==2.5.4
+# Security fixes for the historical Pillow 12.3.0 plotting environment.
+pillow==13.0.0

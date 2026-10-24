@@ -1,0 +1,110 @@
+[
+  {
+    "number": 9,
+    "url": "https://github.com/yunwei37/bpf-gpu-server/security/dependabot/9",
+    "manifest": "bench/results/sustained_remote_resources_20261016/plot_requirements.txt",
+    "package": "Pillow",
+    "severity": "medium",
+    "summary": "Pillow: EPS load(scale) lets Ghostscript render past the decompression bomb limit",
+    "ghsa": "GHSA-vx6w-vv9f-6gvg",
+    "advisory_url": "https://github.com/advisories/GHSA-vx6w-vv9f-6gvg",
+    "vulnerable_version_range": ">= 2.3.0, <= 12.3.0",
+    "first_patched_version": "13.0.0"
+  },
+  {
+    "number": 8,
+    "url": "https://github.com/yunwei37/bpf-gpu-server/security/dependabot/8",
+    "manifest": "bench/results/sustained_remote_resources_20261016/plot_requirements.txt",
+    "package": "pillow",
+    "severity": "high",
+    "summary": "Pillow: Unbounded recursion parsing a PDF page tree or trailer chain (incomplete fix for CVE-2026-42310)",
+    "ghsa": "GHSA-p4wg-p73j-c528",
+    "advisory_url": "https://github.com/advisories/GHSA-p4wg-p73j-c528",
+    "vulnerable_version_range": ">= 5.1.0, < 13.0.0",
+    "first_patched_version": "13.0.0"
+  },
+  {
+    "number": 7,
+    "url": "https://github.com/yunwei37/bpf-gpu-server/security/dependabot/7",
+    "manifest": "bench/results/sustained_remote_resources_20261016/plot_requirements.txt",
+    "package": "Pillow",
+    "severity": "high",
+    "summary": "Pillow: TiffDecode returns uninitialized memory as pixels for short JPEG strips",
+    "ghsa": "GHSA-q45j-58j2-45rg",
+    "advisory_url": "https://github.com/advisories/GHSA-q45j-58j2-45rg",
+    "vulnerable_version_range": ">= 5.3.0, < 13.0.0",
+    "first_patched_version": "13.0.0"
+  },
+  {
+    "number": 6,
+    "url": "https://github.com/yunwei37/bpf-gpu-server/security/dependabot/6",
+    "manifest": "bench/results/sustained_remote_resources_20261016/plot_requirements.txt",
+    "package": "Pillow",
+    "severity": "high",
+    "summary": "Pillow: OOB read in TiffDecode.c tile and RGBA paths leaks heap memory into pixels",
+    "ghsa": "GHSA-c6hw-5grf-ff96",
+    "advisory_url": "https://github.com/advisories/GHSA-c6hw-5grf-ff96",
+    "vulnerable_version_range": ">= 8.1.0, < 13.0.0",
+    "first_patched_version": "13.0.0"
+  },
+  {
+    "number": 5,
+    "url": "https://github.com/yunwei37/bpf-gpu-server/security/dependabot/5",
+    "manifest": "bench/results/sustained_remote_resources_20261016/plot_requirements.txt",
+    "package": "pillow",
+    "severity": "medium",
+    "summary": "Pillow tiled-TIFF decoder reads past tile buffer in copy4 (Unpack.c:1290)",
+    "ghsa": "GHSA-462x-pgg6-55fp",
+    "advisory_url": "https://github.com/advisories/GHSA-462x-pgg6-55fp",
+    "vulnerable_version_range": ">= 8.2.0, < 13.0.0",
+    "first_patched_version": "13.0.0"
+  },
+  {
+    "number": 4,
+    "url": "https://github.com/yunwei37/bpf-gpu-server/security/dependabot/4",
+    "manifest": "bench/results/sustained_remote_resources_20261016/plot_requirements.txt",
+    "package": "Pillow",
+    "severity": "high",
+    "summary": "Pillow: GIF seek keeps rejected size after DecompressionBombError, allowing DoS",
+    "ghsa": "GHSA-65qm-jvmh-6pqg",
+    "advisory_url": "https://github.com/advisories/GHSA-65qm-jvmh-6pqg",
+    "vulnerable_version_range": ">= 9.2.0, < 13.0.0",
+    "first_patched_version": "13.0.0"
+  },
+  {
+    "number": 3,
+    "url": "https://github.com/yunwei37/bpf-gpu-server/security/dependabot/3",
+    "manifest": "bench/results/sustained_remote_resources_20261016/plot_requirements.txt",
+    "package": "Pillow",
+    "severity": "high",
+    "summary": "Pillow: TIFF encoder ColorMap plane-size mismatch causes a heap out-of-bounds read",
+    "ghsa": "GHSA-pchr-8j38-3x4p",
+    "advisory_url": "https://github.com/advisories/GHSA-pchr-8j38-3x4p",
+    "vulnerable_version_range": "<= 12.3.0",
+    "first_patched_version": "13.0.0"
+  },
+  {
+    "number": 2,
+    "url": "https://github.com/yunwei37/bpf-gpu-server/security/dependabot/2",
+    "manifest": "bench/results/sustained_remote_resources_20261016/plot_requirements.txt",
+    "package": "Pillow",
+    "severity": "critical",
+    "summary": "Pillow: Heap buffer overflow in ImagingJpegDecode",
+    "ghsa": "GHSA-8g5g-8vmr-9782",
+    "advisory_url": "https://github.com/advisories/GHSA-8g5g-8vmr-9782",
+    "vulnerable_version_range": "<= 12.3.0",
+    "first_patched_version": "13.0.0"
+  },
+  {
+    "number": 1,
+    "url": "https://github.com/yunwei37/bpf-gpu-server/security/dependabot/1",
+    "manifest": "bench/results/sustained_remote_resources_20261016/plot_requirements.txt",
+    "package": "Pillow",
+    "severity": "high",
+    "summary": "Pillow: Out-of-bounds access in _imagingmorph on a zero-width image",
+    "ghsa": "GHSA-58r4-6rv3-gfh8",
+    "advisory_url": "https://github.com/advisories/GHSA-58r4-6rv3-gfh8",
+    "vulnerable_version_range": "<= 12.3.0",
+    "first_patched_version": "13.0.0"
+  }
+]

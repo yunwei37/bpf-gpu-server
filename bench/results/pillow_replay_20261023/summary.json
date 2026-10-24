@@ -1,0 +1,17 @@
+{
+  "observed_at_utc": "2026-10-24T02:19:35.061995+00:00",
+  "source_parent": "47a94074a92ab1fd70557b4555727d9bf33b7abf",
+  "counts": {
+    "PASS": 136,
+    "MISMATCH": 0,
+    "PAPER_CHANGED": 0
+  },
+  "elapsed_s": 214.83873148891144,
+  "input_count": 7182,
+  "figure_data_byte_identical_to": "../rename_20261017/offline/figure_data.json",
+  "archived_manifest_unchanged": true,
+  "paper_unchanged": true,
+  "plots_visually_inspected": true,
+  "performance_experiments_rerun": false,
+  "alert_dismissals": 0
+}

@@ -1,0 +1,22 @@
+{
+  "python": "3.12.3",
+  "packages": {
+    "matplotlib": "3.11.2",
+    "python-dateutil": "3.0.0",
+    "pyparsing": "3.3.3",
+    "kiwisolver": "1.5.1",
+    "numpy": "2.5.4",
+    "tzdata": "2026.5",
+    "six": "1.17.0",
+    "fonttools": "4.67.0",
+    "pillow": "13.0.0",
+    "contourpy": "1.4.0",
+    "packaging": "26.3",
+    "cycler": "0.12.1"
+  },
+  "advisory_ranges_checked": 9,
+  "inference_packages_present": false,
+  "cuda_visible_devices": "",
+  "fresh_environment": true,
+  "platform": "Linux-7.3.0-070300rc3-generic-x86_64-with-glibc2.39"
+}
