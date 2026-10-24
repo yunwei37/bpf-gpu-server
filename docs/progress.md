@@ -412,3 +412,19 @@ One commit request encounters a Kubernetes API TLS-handshake timeout before
 Workspace execution. A fresh existing-path exec immediately succeeds; HEAD and
 dirty status confirm no commit occurred. Retry only that unexecuted request;
 no host, Pod, credential or configuration mutation is needed. Cause is unknown.
+
+## 2026-10-23 Los Angeles: daily upkeep
+
+The unqualified kernel/GPU compatibility boundary remains; no new concrete
+failure or independent performance mechanism is present today. A credible new
+research claim needs such a case and a controlled test, not more samples from
+the sealed capacity/graph matrices. The most useful available action is keeping
+the reproduction path accessible: main atc213c6f4 matches origin,977relative
+links/fragments and33documented shell blocks pass checks, and public README,
+ARTIFACT and model-path receipt returnHTTP200 with matching bytes. README and
+the directory map need no reshuffle or obsolete-owned-file deletion. The same
+Ready Workspace Pod has zero restarts and its retained claim/journal; no project
+run, GPU application, project pin or task-owned temporary residue needs resuming
+or cleanup. Foreign setup_env.sh, ignored build/, paper and historical evidence
+are preserved. Only this daily reflection/inspection record is appended;
+no code, dependency, runtime or experiment is changed.
