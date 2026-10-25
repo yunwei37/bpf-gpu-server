@@ -29,7 +29,8 @@ Tested: Python3.12.3, Matplotlib3.11.2, NumPy2.5.4; no inference packages.
 The current requirements pin Pillow13.0.0. The archived
 [plot environment](bench/results/sustained_remote_resources_20261016/plot_requirements.txt)
 is a historical freeze containing Pillow12.3.0; install the current requirements
-above for replay. Nine GitHub advisories affect that old version, including
+above for replay. The October23 check recorded nine GitHub advisories for that
+old version, including
 [the JPEG decoder overflow](https://github.com/advisories/GHSA-8g5g-8vmr-9782).
 Historical manifests and measured results are retained unchanged.
 The [Pillow13 replay receipt](bench/results/pillow_replay_20261023/README.md)

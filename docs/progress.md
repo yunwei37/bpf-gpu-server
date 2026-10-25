@@ -448,3 +448,31 @@ requirements and venv prerequisite. Remove the task-owned temporary environment,
 wheel and caches after saving receipts. Paper, models, foreign setup_env.sh,
 existing build outputs and serving settings remain untouched. This repairs a
 real reproduction dependency issue; it adds no new performance claim.
+
+## 2026-10-24 Los Angeles: daily upkeep
+
+The substantive research boundary remains qualification on additional real
+kernel/GPU stacks; there is no new independent performance mechanism or failed
+consumer case to justify reopening the sealed capacity/graph experiments. The
+most promising currently actionable work is maintaining an accurate reproduction
+entry and investigating concrete dependency changes. Today main ata052759b
+matches GitHub main;980relative links (including18fragments) and34documented
+shell blocks pass checks. README and the directory map need no reshuffle or
+obsolete-owned-file deletion. Four public entry/receipt files match Workspace
+bytes. The original Ready Pod has zero restarts, its existing claim/journal,
+and no project run, GPU application, project pin or old task temporary residue
+to resume or clean up. Foreign setup_env.sh, build outputs and historical
+measurement evidence remain untouched.
+
+GitHub now reports41open alerts, all against the same archived Pillow12.3.0
+plot freeze (five critical,23high,13medium). Each advisory lists13.0.0 as its
+first patched version, and the active Pillow13.0.0 pin lies outside all41
+reported vulnerable ranges. No additional dependency mutation or replay is
+warranted: the October23 complete136-check replay remains the relevant tested
+receipt, not a new measurement today. Clarify ARTIFACT's nine-alert count as
+that dated observation rather than a current total. No alert is dismissed and
+no vulnerability-free claim is made. Verify this documentation-only repair by
+local links/shell syntax, diff review, push and public byte equality. Further
+substantive work needs a concrete compatibility failure or independent
+hypothesis with a controlled test; do not invent another benchmark to reverse
+the bounded negative result.
