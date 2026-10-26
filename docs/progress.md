@@ -476,3 +476,21 @@ local links/shell syntax, diff review, push and public byte equality. Further
 substantive work needs a concrete compatibility failure or independent
 hypothesis with a controlled test; do not invent another benchmark to reverse
 the bounded negative result.
+
+## 2026-10-25 Los Angeles: daily upkeep
+
+The main remaining boundary is qualified reuse on other real kernel/GPU stacks,
+not an unfinished speed comparison. The most promising substantive next step
+would be a concrete consumer compatibility failure, validated by exact replies,
+cancellation/cleanup and the same executor comparator; none is identified today.
+Carry out the available upkeep rather than repeat a closed negative experiment:
+main at3fa354ce matches GitHub main,980relative links including18fragments and
+34documented shell blocks pass, and four public entry/receipt files match local
+bytes. README, directory structure and historical evidence need no reshuffle or
+owned-file deletion. The same Ready original Workspace Pod has zero restarts and
+its retained claim/journal; no project run, GPU application, BPF pin or task-owned
+temporary residue needs resuming or cleanup. The41archive-only Pillow alerts are
+unchanged; active Pillow13.0.0 remains outside every reported affected range.
+Append this reflection only, then verify the pushed record's public bytes.
+Preserve foreign setup_env.sh, build outputs, paper and frozen data. No new
+implementation, dependency change or experimental result is claimed today.
