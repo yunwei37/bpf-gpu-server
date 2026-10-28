@@ -531,3 +531,20 @@ the historical Pillow freeze, outside the active13.0.0 pin's reported affected
 ranges. Only this reflection is appended, pushed and checked against public
 bytes. Foreign setup_env.sh, build outputs, paper and frozen experiment evidence
 are preserved. There is no new implementation or experimental result today.
+
+## 2026-10-28 Los Angeles: daily upkeep
+
+The remaining substantive boundary is compatibility beyond the qualified stack.
+The best next research action needs a concrete consumer failure or independent
+mechanism, verified with exact outputs, lifecycle cleanup and a matched control;
+none appears in the open issue list or current Workspace state today. Carry out
+reproduction upkeep: main at84aceef8 matches GitHub main,980relative links
+including18fragments and34shell blocks pass, and four public entry/receipt
+files match local bytes. README and directory organization need no reshuffle or
+obsolete-owned-file removal. The same Ready Pod has zero restarts and its
+existing claim/journal; no project run, GPU application, BPF pin or task temporary
+residue needs resuming or cleanup. The41historical Pillow alerts are unchanged;
+active13.0.0 remains outside every reported affected range. Publish this dated
+reflection and verify public bytes, preserving foreign setup_env.sh, build
+outputs, paper and frozen evidence. This is maintenance only: do not repeat the
+sealed matrices or report old experimental results as new progress.
