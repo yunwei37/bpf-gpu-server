@@ -548,3 +548,42 @@ active13.0.0 remains outside every reported affected range. Publish this dated
 reflection and verify public bytes, preserving foreign setup_env.sh, build
 outputs, paper and frozen evidence. This is maintenance only: do not repeat the
 sealed matrices or report old experimental results as new progress.
+
+## 2026-10-29 Los Angeles: Workspace replacement and daily upkeep
+
+Today's real blocker is an unexpected Workspace container termination. The
+most useful immediate action is to verify recovery through the existing
+Workspace/controller, retained volume and actual repository operations before
+considering another experiment. The old Pod reports Succeeded/exit0, but its
+DisruptionTarget condition records TerminationByKubelet at16:06:01UTC because
+the node was low on ephemeral-storage; it reports container use9150200Ki and
+request0. The controller already created a replacement at the same time, Ready
+at16:11:43UTC. Node lab is Ready and DiskPressure=False, transitioned16:11:31UTC.
+The underlying source of the node pressure is not established here; this thread
+performs no host cleanup, Pod deletion, restart or runtime/configuration change.
+
+The old Pod suffix66f4p/UID4c7f336d-0a3c-4c4f-a4ee-c1f8f9ac0861 is replaced by
+suffixvzztd/UID7c20c2a8-1169-4092-82f4-2ad808b20923 in the same original Workspace
+IDeb48d962-76f4-4ff7-bac5-7bc62ec2ada3. The new Pod has zero restarts and mounts
+the same Bound claim UID5d1b0ce5-fbee-43ef-93f1-d433037bb5e4 and matching PV.
+Actual exec reads the original repository, journal, paper and cached model
+configs. Git remains main at32e82a9a matching GitHub, with no tracked changes
+and only the preserved foreign setup_env.sh untracked. All24770tracked result
+files are present; this is a presence/Git-state check, not a new raw-data replay.
+Filesystem observation: root238G free and Workspace volume8.8G free (df -h).
+GPU query succeeds, with no current compute application; no project experiment,
+BPF pin or owned task temporary directory is found. Pre-termination process
+state is not inferred from the replacement Pod, and GPU serving is not newly
+qualified merely because the container/GPU query works.
+
+Daily README/directory inspection finds no obsolete owned file or reshuffle
+needed;980relative links including18fragments and34documented shell blocks
+pass. Four public entry/receipt files match local bytes, the issue list is
+empty, and41historical Pillow alerts remain outside active13.0.0's affected
+ranges. Append, push and check this recovery/maintenance record's public bytes.
+Preserve paper, model caches, build outputs and all frozen evidence. Further
+substantive research still needs a concrete consumer compatibility case or
+independent mechanism with exact outputs, lifecycle cleanup and matched controls;
+do not reopen the sealed capacity/graph matrices to turn a negative result
+positive. This event establishes recovered maintenance access, not new
+performance or full GPU-serving validation.
