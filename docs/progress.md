@@ -587,3 +587,23 @@ independent mechanism with exact outputs, lifecycle cleanup and matched controls
 do not reopen the sealed capacity/graph matrices to turn a negative result
 positive. This event establishes recovered maintenance access, not new
 performance or full GPU-serving validation.
+
+## 2026-10-30 Los Angeles: daily upkeep after recovery
+
+The research boundary remains qualified reuse beyond the original stack, with
+no new consumer failure or independent mechanism identified in the open issue
+list or Workspace today. The most promising substantive next action would
+reproduce a concrete such case and verify exact replies, cancellation/cleanup
+and matched resource/tail behavior. Meanwhile verify yesterday's recovered
+maintenance path: the replacement Pod remains Ready with zero restarts and the
+original claim/journal; lab is Ready with DiskPressure=False unchanged since
+October29. Root has240G free and the Workspace volume8.8G (df -h). Main at3a287607
+matches GitHub main;980relative links including18fragments and34shell blocks
+pass, and four public entry/receipt files match local bytes. README/directory
+organization needs no reshuffle or obsolete-owned-file deletion. No project
+run, GPU application, BPF pin or task temporary residue needs resuming or
+cleanup;41archive-only Pillow alerts remain outside the active13.0.0 pin's
+reported affected ranges. Append and publish this reflection, checking public
+bytes, while preserving foreign setup_env.sh, build outputs, paper and frozen
+evidence. No repeated closed experiment, runtime mutation or new GPU-serving
+qualification is justified by these unchanged observations.
