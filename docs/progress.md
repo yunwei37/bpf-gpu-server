@@ -607,3 +607,38 @@ reported affected ranges. Append and publish this reflection, checking public
 bytes, while preserving foreign setup_env.sh, build outputs, paper and frozen
 evidence. No repeated closed experiment, runtime mutation or new GPU-serving
 qualification is justified by these unchanged observations.
+
+## 2026-10-31 Los Angeles: recurrent eviction and daily upkeep
+
+The immediate blocker recurs: the original Workspace's replacement container
+is terminated for ephemeral-storage pressure. The most promising action is to
+verify the existing controller/PVC recovery and inspect retained eviction-time
+logs, rather than start another performance matrix. Carry that out: the next
+replacement is Ready with zero restarts on the same Bound PVC, source/main at
+58e46171 and journal retained;24770tracked result files are present and Git
+reports no tracked changes before this record. No current project experiment,
+GPU compute application, project BPF pin or task temporary directory is found.
+The earlier process state is unknown, and recovered maintenance access is not
+new GPU-serving qualification.
+
+The infrastructure incident is recorded in its owning private repository at
+incident-logs/2026-10-31-bpf-gpu-workspace-eviction.md, commitsf0937a5a/9953663e.
+It retains Pod/PVC identities, the 06:29UTC eviction/06:35UTC recovery, kubelet
+filesystem stats and journal evidence: image-filesystem use95% before eviction,
+with unused-image GC freeing0bytes. Current directory measurements show most
+shared-disk space belongs to non-image data; they do not establish who produced
+the earlier growth or authorize deleting another workload's data. This thread
+changes no host storage, quotas, scheduling, permissions or other Workspace.
+The operational path is restored; the recurrent storage cause is not permanently
+fixed. The infrastructure audit has six unrelated existing/foreign record
+failures and no finding on the new incident; those files are preserved.
+
+Daily checks pass980relative links including18fragments and34shell blocks;
+four public entry/receipt files match local bytes. README/directory organization
+needs no reshuffle or obsolete-owned-file deletion; the open issue list is empty
+and41archive-only Pillow alerts remain outside active13.0.0's affected ranges.
+Publish this reflection and verify public bytes. Preserve foreign setup_env.sh,
+build outputs, paper, model caches and frozen results. The next substantive
+research step still requires a concrete compatibility case or independent
+mechanism with exact replies, lifecycle cleanup and matched controls; do not
+reopen the closed capacity/graph experiments or claim a new performance result.
