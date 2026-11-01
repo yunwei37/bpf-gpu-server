@@ -642,3 +642,34 @@ build outputs, paper, model caches and frozen results. The next substantive
 research step still requires a concrete compatibility case or independent
 mechanism with exact replies, lifecycle cleanup and matched controls; do not
 reopen the closed capacity/graph experiments or claim a new performance result.
+
+## 2026-11-01 Los Angeles: daily upkeep and dependency-scope review
+
+Substantive research still needs a concrete compatibility case or independent
+mechanism, not another run of the closed capacity/graph matrices. The recovered
+Workspace is unchanged today: same Ready Pod, zero restarts, retained claim and
+journal, lab Ready/DiskPressureFalse since October31, and no project experiment,
+GPU compute process, project pin or task temporary residue to resume or clean.
+Root has267G free and the Workspace9.5G (df -h); this does not establish a
+permanent fix for the earlier recurring storage pressure. Main at4cce1eda matches
+GitHub, four public entry/receipt files match local bytes, and no open issue is
+reported. README/directory organization needs no reshuffle or owned-file deletion.
+
+A concrete maintenance change is three newly observed vLLM alerts, all the same
+GHSA-frvg-qw88-hww9: one on active requirements.txt and two archived source
+requirements, in addition to the41historical Pillow alerts. The most useful
+safe action is to trace the advisory's required feature combination against the
+qualified source and commands. Perform that review: both bootstrap ASTs have
+exactly one LLM call with only model/dtype/max_model_len; official smoke and HTTP
+commands supply no KV transfer/offloading flags, and upstream0.31.0 defaults
+KV transfer and KV-offloading size to None. The documented paths do not enable
+the required P2P offloading combination. Record that scoped inference and its
+primary sources in Getting started, link it from ARTIFACT, and explicitly retain
+open version alerts and the unqualified0.32.0 upgrade boundary. This is static
+configuration review, not an exploit test, package fix or broad safety claim.
+
+After editing,984relative links including19fragments and34shell blocks pass;
+requirements, executable code, paper and archived evidence remain unchanged.
+Commit/push the three owned documentation paths and verify their public bytes.
+Preserve foreign setup_env.sh and build outputs. No new performance measurement,
+GPU-serving qualification, dependency install or runtime mutation is made.

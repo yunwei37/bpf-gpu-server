@@ -172,7 +172,9 @@ x86-64 TCP client (originally g10). See [HOST](bench/results/HOST.md).
 Software:Linux7.3-rc3 with BTF/cgroupv2/bpffs/tested io_uring BPF/UAPI;
 driver610.57.04;CUDA toolkit13.0/nvcc13.0.88;clang,C++,make,libelf/zlib.
 Inference:Python3.12,torch2.13.0+cu129,vLLM0.31.0 and
-[requirements.txt](requirements.txt). Remote LLM client needs uvloop/aiohttp;
+[requirements.txt](requirements.txt). See the scoped
+[vLLM dependency advisory note](docs/getting-started.md#dependency-advisory-scope).
+Remote LLM client needs uvloop/aiohttp;
 remote graph client needs Python3.12 plus the native binary.
 
 Actual ordinary builds use system libbpf1.3 headers with libbpf1.6.3

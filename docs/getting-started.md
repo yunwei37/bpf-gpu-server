@@ -73,6 +73,27 @@ contract. The in-process setting preserves graph/tensor ownership at bootstrap.
 Toolkit and Python CUDA runtime versions are distinct; Make binds against the
 loaded Torch runtime. System Python packages remain unchanged.
 
+### Dependency advisory scope
+
+The qualified vLLM0.31.0 pin falls within
+[GHSA-frvg-qw88-hww9](https://github.com/advisories/GHSA-frvg-qw88-hww9),
+fixed upstream in0.32.0. This denial-of-service advisory requires an explicitly
+enabled OffloadingConnector, TieringOffloadingSpec and P2P secondary tier.
+
+Static review on November1 finds that the
+[graph bootstrap](../executor/vllm_graph.py),
+[mixed bootstrap](../executor/vllm_mixed.py) and
+[official smoke command](../bench/smoke_paper_llm.py) leave KV transfer/offloading
+unconfigured. Upstream0.31.0 defaults
+[KV transfer](https://github.com/vllm-project/vllm/blob/v0.31.0/vllm/engine/arg_utils.py#L721)
+and [KV offloading size](https://github.com/vllm-project/vllm/blob/v0.31.0/vllm/config/cache.py#L256)
+to None. The advisory's required feature combination is therefore absent from
+these documented paths. This is a configuration review, not a dynamic exploit
+test or a package-level fix. Version alerts remain open. The historical0.31.0
+pins/results are retained;0.32.0 interoperability is not qualified here.
+Enabling P2P KV tiering is outside this walkthrough and requires the upstream
+fix plus separate compatibility validation.
+
 ## Build and model
 
 ~~~sh
