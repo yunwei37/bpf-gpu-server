@@ -673,3 +673,35 @@ requirements, executable code, paper and archived evidence remain unchanged.
 Commit/push the three owned documentation paths and verify their public bytes.
 Preserve foreign setup_env.sh and build outputs. No new performance measurement,
 GPU-serving qualification, dependency install or runtime mutation is made.
+
+## 2026-11-02 Los Angeles: access repair and daily upkeep
+
+Today's immediate blocker is the management client's Tailscale connection,
+not a demonstrated Workspace outage. The normal wrapper cannot reach an HA
+ready API; the client reports Running but SelfOnline=False, no coordination map
+for over seven hours, while public HTTPS works. The most promising safe action
+is to restore the existing management path and verify the actual Workspace.
+A service restart is denied before stopping anything; transient CLI rebind does
+not restore connectivity. The inventory's existing Cloudflare lab SSH entry
+works. Invocation-local ProxyJump through it lets the unchanged cluster wrapper
+reach inventory-selected HA servers and exec into the original Workspace.
+No persistent SSH, network, permission, service or scheduling setting changes.
+The client connection remains unrepaired; alternate access is not native
+Tailscale recovery. The owning private infrastructure repository records this
+in incident-logs/2026-11-02-controller-tailscale-workspace-access.md at5a87c7bd.
+Its audit has seven unrelated existing/foreign record/index failures and none
+on this new incident; unrelated work is preserved.
+
+Actual checks find the same Ready Pod with zero restarts, original PVC/journal,
+lab Ready and DiskPressureFalse unchanged since October31. Main at3aedafcf
+matches GitHub;984relative links including19fragments and34shell blocks pass,
+and four public entry/receipt files match local bytes. README and directory
+organization need no reshuffle or obsolete-owned-file deletion. No project run,
+project pin or task temporary residue needs resuming or cleanup. Root has214G
+free and the Workspace9.5G (df -h); the recurring storage cause is not claimed
+fixed. The issue list is empty and44dependency alerts are unchanged from the
+scoped November1 review. Append/push this record and verify its public bytes;
+preserve foreign setup_env.sh, build outputs, paper and frozen evidence. Future
+substantive research still needs a concrete compatibility failure or independent
+mechanism with exact outputs, lifecycle cleanup and matched controls. No closed
+experiment, GPU qualification or performance measurement is repeated today.
