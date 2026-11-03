@@ -705,3 +705,39 @@ preserve foreign setup_env.sh, build outputs, paper and frozen evidence. Future
 substantive research still needs a concrete compatibility failure or independent
 mechanism with exact outputs, lifecycle cleanup and matched controls. No closed
 experiment, GPU qualification or performance measurement is repeated today.
+
+## 2026-11-03 Los Angeles: recovered access and obsolete-entry retirement
+
+The native management path is recovered: Windows Tailscale now reports
+SelfOnline=True with no health errors, and the unchanged default wrapper reaches
+the same Ready original Workspace Pod, zero restarts and retained journal/PVC.
+Actual exec works; lab remains Ready/DiskPressureFalse. Recovery cause is not
+attributed to this thread. The private infrastructure incident's dated closure
+is commita2274038, with eight unrelated repository audit errors and none on that
+incident. Source main at13fb37c8 matches GitHub; four public entry/receipt files
+match local bytes. No project run, GPU application, BPF pin or task temporary
+residue needs resuming or cleanup. Root has176G free and the Workspace9.5G
+(df -h); this is not a permanent storage-pressure fix.
+
+The actionable new maintenance issue is eight upstream vLLM advisories repeated
+across three manifests, increasing open alerts from44to68. Trace their actual
+inputs/configurations before changing the qualified stack. Both native vLLM
+CUDA dispatchers already reject token>=vocab before prefill scheduling. This
+is a source review, not new malicious-input GPU validation; upstream HTTP has a
+separate validator. Extend Getting started's scoped advisory table, keeping the
+known-vulnerable0.31.0 version and unqualified0.32.0 compatibility boundary
+explicit rather than claiming all API surfaces are safe.
+
+The review finds the obsolete finding0011 driver has global pkill, no API-key
+configuration and SSE-chunk token counting, limitations already noted in later
+findings0020/0021. No active source/Make caller depends on its paths. Move the
+two old tools into bench/results/legacy_http_20261009 as byte-exact, mode-retained
+historical sources and document the replacement artifact workflow. Do not run
+or signal a server to retire them. Existing findings, raw logs, paper and final
+comparison sources remain unchanged. Validate both archived byte copies, no
+remaining active caller, Python syntax,989relative links including20fragments,
+34documented shell blocks and own diff review; then commit/push and check public
+bytes. No GPU/performance experiment or dependency upgrade is performed. The
+substantive research boundary remains qualified reuse on another real stack or
+a concrete consumer failure; preserve the closed negative result instead of
+rerunning it to seek a positive claim.

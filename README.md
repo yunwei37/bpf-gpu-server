@@ -200,6 +200,11 @@ The historical 6.36 ms token-gap difference remains unreproduced/unallocated.
 These boundaries do not justify repeating closed micro-optimizations or
 rewriting model-specific attention/matrix kernels.
 
+The early HTTP driver/client are now
+[historical sources](bench/results/legacy_http_20261009/README.md).
+Finding0011's original commands remain historical; use the artifact's current
+bounded official-vLLM comparison for reproduction.
+
 ## Repository map
 
 | Path | Purpose |

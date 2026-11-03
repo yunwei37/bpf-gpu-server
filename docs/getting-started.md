@@ -94,6 +94,25 @@ pins/results are retained;0.32.0 interoperability is not qualified here.
 Enabling P2P KV tiering is outside this walkthrough and requires the upstream
 fix plus separate compatibility validation.
 
+The November3 review also found the following upstream advisories, all fixed
+in0.32.0. The0.31.0 package remains affected by version; its alert is not dismissed.
+The P2P review above covers only that feature combination, not all advisories.
+
+| Advisory | Relation to this artifact |
+|---|---|
+| [Prompt ID bounds](https://github.com/advisories/GHSA-q97c-p368-75c4) | Both native vLLM dispatchers reject token IDs greater than or equal to the model vocabulary before scheduling prefill; see [mixed admission](../executor/vllm_mixed.cu). The official upstream API has a separate validator and is not qualified here for hostile token inputs. |
+| [CORS defaults](https://github.com/advisories/GHSA-vvpg-rrww-wpmh) | The official smoke uses loopback and an ephemeral API key; neither is an upstream CORS fix. The old unauthenticated HTTP driver/client are [retired historical sources](../bench/results/legacy_http_20261009/README.md). |
+| [Responses templates](https://github.com/advisories/GHSA-x567-49g5-p4cf) and [unbounded template rendering](https://github.com/advisories/GHSA-542m-9234-8gvf) | The custom binary protocol accepts token IDs rather than request chat templates. The full upstream HTTP/Responses server is not established safe by finite benchmark clients. |
+| [Forged multimodal SHM carriers](https://github.com/advisories/GHSA-6757-hggm-hp2w) | No SHM processor-cache option appears in the recorded launch commands; SHM scale-out serving is outside the qualified workflow. |
+| [Image/EPS decoding](https://github.com/advisories/GHSA-h3rc-j82p-2c3h) | Media decoding is outside the custom token protocol and tested text workloads; this does not validate the upstream general media frontend. |
+| [Phi-4 audio](https://github.com/advisories/GHSA-8397-8qf6-f2gm) and [DeepSeek-OCR](https://github.com/advisories/GHSA-gq5q-89c7-vhvx) | These models/media workloads are outside the two qualified text checkpoints. |
+
+This is source/configuration review, not exploit reproduction or a complete
+security audit. The qualified dependency set is retained for historical
+reproduction; a patched vLLM backend needs separate graph/API compatibility
+validation. No current public general-purpose vLLM deployment is supplied by
+these benchmark receipts.
+
 ## Build and model
 
 ~~~sh
