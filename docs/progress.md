@@ -741,3 +741,25 @@ bytes. No GPU/performance experiment or dependency upgrade is performed. The
 substantive research boundary remains qualified reuse on another real stack or
 a concrete consumer failure; preserve the closed negative result instead of
 rerunning it to seek a positive claim.
+
+## 2026-11-04 Los Angeles: daily upkeep
+
+The substantive boundary remains qualified reuse on other real kernel/GPU stacks,
+with no concrete consumer failure or independent mechanism in today's open issue
+list or Workspace. The most promising next research action needs such a case,
+then exact replies, lifecycle cleanup and matched controls; another sample of
+the sealed matrices would not resolve that boundary. Carry out the available
+maintenance instead: main atcb7074f0 matches GitHub,989relative links including
+20fragments and34documented shell blocks pass, and six public files match local
+bytes, including both newly archived historical HTTP tool sources. README and
+directory organization need no reshuffle or further obsolete-owned-file removal.
+The default management path works; the same original Workspace Pod is Ready
+with zero restarts and its retained claim/journal. Lab remains Ready with
+DiskPressureFalse since October31. Root has217G free and the Workspace9.5G
+(df -h), without establishing a permanent storage fix. No project experiment,
+GPU application, BPF pin or task temporary residue needs resuming or cleanup.
+The68dependency alerts are unchanged; retain the scoped advisory documentation
+and known-vulnerable version boundary. Append/push this reflection and check its
+public bytes, preserving foreign setup_env.sh, build outputs, paper, model caches
+and frozen evidence. No new code, dependency change or experimental result is
+claimed today.
