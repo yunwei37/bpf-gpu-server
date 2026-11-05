@@ -763,3 +763,35 @@ and known-vulnerable version boundary. Append/push this reflection and check its
 public bytes, preserving foreign setup_env.sh, build outputs, paper, model caches
 and frozen evidence. No new code, dependency change or experimental result is
 claimed today.
+
+## 2026-11-05 Los Angeles: recurring client access failure and upkeep
+
+Today's concrete blocker is the Windows management client's coordination
+connection again, not a demonstrated Workspace outage. Tailscale is Running but
+SelfOnline=False with no coordination map for11h19m55s; a direct coordination
+HTTPS probe fails SSL negotiation. The current Windows token is not an
+administrator. No repeat service restart, logout, credential or network-setting
+change is attempted. The most useful safe action is to restore maintenance
+access through an existing path and verify the actual original workload.
+Carry that out with the recorded Cloudflare lab entry and invocation-local
+ProxyJump: the unchanged wrapper reaches inventory-selected HA servers and
+executes in the same Ready Workspace Pod, zero restarts, original claim/journal.
+Lab remains Ready with DiskPressureFalse since October31. This restores the
+operational maintenance path, not native client connectivity. The private
+infrastructure incident at incident-logs/2026-11-02-controller-tailscale-workspace-access.md
+records the recurrence in commitf12bac4e; its full audit has ten unrelated
+existing/foreign record/index failures and no finding on that incident.
+
+Main at6727d6a2 matches GitHub. Daily inspection passes989relative links
+including20fragments and34documented shell blocks; six public entry/archive
+files match local bytes. README/directory layout needs no reshuffle or further
+obsolete-owned-file removal. The open issue list is empty,68dependency alerts
+are unchanged, and no project experiment, GPU application, BPF pin or task
+temporary residue needs resuming or cleanup. Root has179G free and the
+Workspace9.5G (df -h), without establishing a permanent storage fix. Append/push
+this reflection and verify public bytes, preserving foreign setup_env.sh,
+build outputs, paper, model caches and frozen evidence. The substantive
+research boundary remains qualified reuse beyond this stack; the next useful
+experiment needs a concrete compatibility failure or independent mechanism,
+exact outputs, lifecycle cleanup and matched controls. No closed matrix or
+GPU/performance experiment is repeated to rescue the negative result.
