@@ -1,6 +1,6 @@
 # Qualified vLLM/HF adapter environment; CUDA toolkit and libbpf are separate.
 --extra-index-url https://download.pytorch.org/whl/cu129
-vllm==0.31.0
+vllm==0.32.0
 torch==2.13.0+cu129
 transformers==5.17.0
 numpy==2.3.5
